@@ -319,8 +319,8 @@ export default function LessonPage({
       {/* Breadcrumb */}
       <div className="mb-4">
         <Link href={`/lectures/${categoryId}/${courseId}`}>
-          <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-            <ArrowLeft className="h-4 w-4" />
+          <Button size="sm" className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600">
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
             {course.name}
           </Button>
         </Link>
@@ -330,10 +330,6 @@ export default function LessonPage({
         <div>
           <h1 className="text-xl font-bold text-foreground">{lesson.title}</h1>
           <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {lesson.duration}
-            </span>
             <Badge variant="secondary">{category.name}</Badge>
           </div>
         </div>
@@ -364,10 +360,6 @@ export default function LessonPage({
                 <div className="space-y-2">
                   <Label htmlFor="edit-video">영상 URL</Label>
                   <Input id="edit-video" defaultValue={lesson.videoUrl} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-duration">재생 시간</Label>
-                  <Input id="edit-duration" defaultValue={lesson.duration} />
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
