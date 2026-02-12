@@ -19,6 +19,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/lib/auth-context"
+import Image from "next/image"
 
 const navItems = [
   { href: "/dashboard", label: "대시보드", icon: LayoutDashboard },
@@ -68,12 +69,18 @@ export function SidebarNav() {
       >
         {/* Logo */}
         <div className="flex items-center gap-2 border-b border-border px-6 py-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <BookOpen className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-8 w-8 items-center justify-center">
+            <Image
+              src="/images/logo/logo_symbol_s2y.png"
+              alt="Logo"
+              width={30}
+              height={30}
+              className="h-8 w-10 text-sidebar-primary"
+            />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground">EduManager</h1>
-            <p className="text-xs text-muted-foreground">학생 관리 시스템</p>
+            <h1 className="text-lg font-bold text-foreground">서이연 수학</h1>
+            <p className="text-xs text-muted-foreground">학생 관리 사이트</p>
           </div>
         </div>
 
@@ -89,8 +96,8 @@ export function SidebarNav() {
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-violet-500 text-primary-foreground"
+                    : "text-muted-foreground hover:bg-violet-100 hover:text-foreground"
                 )}
               >
                 <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -107,8 +114,8 @@ export function SidebarNav() {
               className={cn(
                 "flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold",
                 isAdmin
-                  ? "bg-emerald-500/10 text-emerald-600"
-                  : "bg-primary/10 text-primary"
+                  ? "bg-rose-500/10 text-rose-600"
+                  : "bg-violet-500/10 text-violet-600"
               )}
             >
               {user.name.charAt(0)}
@@ -117,25 +124,24 @@ export function SidebarNav() {
               <div className="flex items-center gap-1.5">
                 <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
                 {isAdmin && (
-                  <Badge className="gap-0.5 bg-emerald-500/10 px-1.5 py-0 text-[10px] text-emerald-600 hover:bg-emerald-500/10">
+                  <Badge className="gap-0.5 bg-rose-500/10 px-1.5 py-0 text-[10px] text-rose-600 hover:bg-rose-500/10">
                     <Shield className="h-2.5 w-2.5" />
                     관리자
                   </Badge>
                 )}
               </div>
               <p className="truncate text-xs text-muted-foreground">
-                {isAdmin ? "관리자" : user.grade}
+                {isAdmin ? "선생님" : user.grade}
               </p>
             </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="mt-2 flex items-center gap-2 rounded-lg px-0 py-2 text-sm text-muted-foreground transition-colors hover:text-violet-600"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <LogOut className="h-4 w-4" />
-            로그아웃
-          </button>
         </div>
       </aside>
     </>
