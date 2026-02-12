@@ -125,8 +125,8 @@ export default function CategoryPage({ params }: { params: Promise<{ categoryId:
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link href="/lectures">
-          <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-            <ArrowLeft className="h-4 w-4" />
+          <Button size="sm" className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600">
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
             복습 영상
           </Button>
         </Link>
@@ -136,7 +136,7 @@ export default function CategoryPage({ params }: { params: Promise<{ categoryId:
         <div>
           <h1 className="text-2xl font-bold text-foreground">{category?.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{category?.description}</p>
-          <Badge variant="secondary" className="mt-2">
+          <Badge className="mt-2 border-transparent text-secondary-foreground text-xs bg-violet-100 hover:bg-violet-100">
             {category?.instructor}
           </Badge>
         </div>
@@ -264,8 +264,8 @@ export default function CategoryPage({ params }: { params: Promise<{ categoryId:
                 <Card className="border-border transition-all hover:border-primary/30 hover:shadow-sm cursor-pointer">
                   <CardContent className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-4 flex-1">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 flex-shrink-0">
-                        <BookOpen className="h-5 w-5 text-primary" />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 flex-shrink-0">
+                        <BookOpen className="h-5 w-5 text-violet-500" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium text-foreground">{course.name}</h3>
