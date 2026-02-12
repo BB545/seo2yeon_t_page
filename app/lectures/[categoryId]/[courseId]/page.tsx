@@ -61,7 +61,6 @@ export default function CoursePage({
       courseId,
       title: newLesson.title,
       videoUrl: newLesson.videoUrl,
-      duration: "0:00",
       timemarks: [],
       resources: [],
     }
@@ -115,8 +114,8 @@ export default function CoursePage({
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link href={`/lectures/${categoryId}`}>
-          <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
-            <ArrowLeft className="h-4 w-4" />
+          <Button size="sm" className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600">
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
             {category.name}
           </Button>
         </Link>
@@ -190,16 +189,12 @@ export default function CoursePage({
               <Link href={`/lectures/${categoryId}/${courseId}/${lesson.id}`}>
                 <Card className="border-border transition-all hover:border-primary/30 hover:shadow-sm cursor-pointer">
                   <CardContent className="flex items-center gap-4 p-4">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-violet-400 text-sm font-bold text-primary-foreground">
                       {index + 1}
                     </div>
                     <div className="flex-1">
                       <h3 className="font-medium text-foreground">{lesson.title}</h3>
                       <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {lesson.duration}
-                        </span>
                         <span>{lesson.timemarks.length}개 타임마크</span>
                         <span>{lesson.resources.length}개 자료</span>
                       </div>

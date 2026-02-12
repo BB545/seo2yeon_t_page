@@ -118,7 +118,6 @@ export interface Lesson {
   courseId: string
   title: string
   videoUrl: string
-  duration: string
   timemarks: Timemark[]
   resources: Resource[]
 }
@@ -188,7 +187,6 @@ export const lessons: Lesson[] = [
     courseId: "course-1",
     title: "함수의 극한과 연속",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    duration: "45:30",
     timemarks: [
       { time: "00:00", label: "도입 - 함수의 극한 개념" },
       { time: "05:20", label: "극한값의 계산" },
@@ -206,7 +204,6 @@ export const lessons: Lesson[] = [
     courseId: "course-1",
     title: "미분의 정의와 기본 공식",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    duration: "50:15",
     timemarks: [
       { time: "00:00", label: "미분의 정의" },
       { time: "10:30", label: "기본 미분 공식" },
@@ -223,7 +220,6 @@ export const lessons: Lesson[] = [
     courseId: "course-1",
     title: "도함수의 활용",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    duration: "42:00",
     timemarks: [
       { time: "00:00", label: "접선의 방정식" },
       { time: "12:00", label: "함수의 증가와 감소" },
