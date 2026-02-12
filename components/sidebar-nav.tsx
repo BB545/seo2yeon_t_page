@@ -43,14 +43,26 @@ export function SidebarNav() {
   return (
     <>
       {/* Mobile toggle */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="fixed top-4 left-4 z-50 lg:hidden"
-        onClick={() => setMobileOpen(!mobileOpen)}
-      >
-        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </Button>
+      <div className="lg:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-white px-4 py-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setMobileOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        <div className="flex items-center gap-2">
+          <Image
+            src="/images/logo/logo_s2y.png"
+            alt="Logo"
+            width={100}
+            height={30}
+          />
+        </div>
+
+        <div className="w-8" />
+      </div>
 
       {/* Overlay */}
       {mobileOpen && (
@@ -82,6 +94,15 @@ export function SidebarNav() {
             <h1 className="text-lg font-bold text-foreground">서이연 수학</h1>
             <p className="text-xs text-muted-foreground">학생 관리 사이트</p>
           </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden top-2 right-2 absolute"
+            onClick={() => setMobileOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
 
         {/* Nav items */}
