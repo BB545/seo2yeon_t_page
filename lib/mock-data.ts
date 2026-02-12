@@ -104,6 +104,7 @@ export interface LectureCategory {
   thumbnail: string
   courseCount: number
   color: string
+  assignedTo?: string[]
 }
 
 export interface Course {

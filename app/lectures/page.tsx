@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { BookOpen, ArrowRight, Plus, Pencil, Trash2 } from "lucide-react"
-import { lectureCategories, LectureCategory } from "@/lib/mock-data"
+import { lectureCategories, LectureCategory, students } from "@/lib/mock-data"
 import { useAuth } from "@/lib/auth-context"
 
 const colorOptions = ["bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"]
@@ -47,10 +47,11 @@ interface CategoryFormData {
   description: string
   instructor: string
   color: string
+  assignedTo: string[]
 }
 
 export default function LecturesPage() {
-  const { isAdmin } = useAuth()
+  const { isAdmin, user } = useAuth()
   const [addOpen, setAddOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -59,8 +60,30 @@ export default function LecturesPage() {
     description: "",
     instructor: "",
     color: "bg-blue-500",
+    assignedTo: [],
   })
+  const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set())
   const [refreshKey, setRefreshKey] = useState(0)
+
+  // 학생 이름 가져오기 (ID로)
+  const getStudentName = (studentId: string) => {
+    const student = students.find((s) => s.id === studentId)
+    return student?.name || "알 수 없음"
+  }
+
+  // 카테고리 필터링: 학생은 자신에게 할당된 카테고리만, 관리자는 모두 표시
+  const getVisibleCategories = () => {
+    if (isAdmin) {
+      return lectureCategories
+    }
+    // 학생 뷰: 할당된 학생이 없거나 현재 사용자가 포함된 카테고리만 표시
+    return lectureCategories.filter((category) => {
+      if (!category.assignedTo || category.assignedTo.length === 0) {
+        return false // 지정된 학생이 없으면 학생에게는 보이지 않음
+      }
+      return category.assignedTo.includes(user?.id || "")
+    })
+  }
 
   // 카테고리 추가
   const handleAddCategory = () => {
@@ -74,10 +97,18 @@ export default function LecturesPage() {
       thumbnail: "",
       courseCount: 0,
       color: formData.color,
+      assignedTo: Array.from(selectedStudents),
     }
 
     lectureCategories.push(newCategory)
-    setFormData({ name: "", description: "", instructor: "", color: "bg-blue-500" })
+    setFormData({ 
+      name: "", 
+      description: "", 
+      instructor: "", 
+      color: "bg-blue-500",
+      assignedTo: []
+    })
+    setSelectedStudents(new Set())
     setAddOpen(false)
     setRefreshKey((prev) => prev + 1)
   }
@@ -89,7 +120,9 @@ export default function LecturesPage() {
       description: category.description,
       instructor: category.instructor,
       color: category.color,
+      assignedTo: category.assignedTo || [],
     })
+    setSelectedStudents(new Set(category.assignedTo || []))
     setEditingId(category.id)
     setEditOpen(true)
   }
@@ -103,9 +136,11 @@ export default function LecturesPage() {
       category.description = formData.description
       category.instructor = formData.instructor
       category.color = formData.color
+      category.assignedTo = Array.from(selectedStudents)
     }
     setEditingId(null)
     setEditOpen(false)
+    setSelectedStudents(new Set())
     setRefreshKey((prev) => prev + 1)
   }
 
@@ -118,13 +153,28 @@ export default function LecturesPage() {
     }
   }
 
+  // 학생 체크박스 토글
+  const toggleStudent = (studentId: string) => {
+    const updated = new Set(selectedStudents)
+    if (updated.has(studentId)) {
+      updated.delete(studentId)
+    } else {
+      updated.add(studentId)
+    }
+    setSelectedStudents(updated)
+  }
+
+  const visibleCategories = getVisibleCategories()
+
   return (
     <AppLayout>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">복습 영상</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            강의 카테고리를 선택하여 복습 영상을 시청하세요.
+            {isAdmin 
+              ? "강의 카테고리를 관리합니다."
+              : "강의 카테고리를 선택하여 복습 영상을 시청하세요."}
           </p>
         </div>
         {isAdmin && (
@@ -189,13 +239,42 @@ export default function LecturesPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label>대상 학생 지정 *</Label>
+                  <div className="rounded-lg border border-border p-3 max-h-[250px] overflow-y-auto">
+                    <div className="space-y-2">
+                      {students.map((student) => (
+                        <label
+                          key={student.id}
+                          className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
+                        >
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                            checked={selectedStudents.has(student.id)}
+                            onChange={() => toggleStudent(student.id)}
+                          />
+                          <span className="text-sm text-foreground">
+                            {student.name}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {student.grade}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedStudents.size}명 선택됨
+                  </p>
+                </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
                     취소
                   </Button>
                   <Button
                     type="submit"
-                    disabled={!formData.name || !formData.description || !formData.instructor}
+                    disabled={!formData.name || !formData.description || !formData.instructor || selectedStudents.size === 0}
                   >
                     추가
                   </Button>
@@ -207,58 +286,81 @@ export default function LecturesPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2" key={refreshKey}>
-        {lectureCategories.map((category) => (
-          <div key={category.id} className="group relative">
-            <Link href={`/lectures/${category.id}`}>
-              <Card className="border-border transition-all hover:border-primary/30 hover:shadow-md cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconBgMap[category.color]}`}>
-                      <BookOpen className="h-6 w-6" />
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                  </div>
-                  <div className="mt-4">
-                    <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
-                  </div>
-                  <div className="mt-4 flex items-center gap-3">
-                    <Badge variant="secondary" className="text-xs">
-                      {category.instructor}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{category.courseCount}개 강좌</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-            {isAdmin && (
-              <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-8 w-8 bg-white/90"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handleEditOpen(category)
-                  }}
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-8 w-8 bg-white/90 text-destructive hover:text-destructive"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handleDeleteCategory(category.id)
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            )}
+        {visibleCategories.length === 0 ? (
+          <div className="col-span-full py-12 text-center">
+            <p className="text-sm text-muted-foreground">
+              {isAdmin 
+                ? "카테고리가 없습니다." 
+                : "현재 할당된 강의 카테고리가 없습니다."}
+            </p>
           </div>
-        ))}
+        ) : (
+          visibleCategories.map((category) => (
+            <div key={category.id} className="group relative">
+              <Link href={`/lectures/${category.id}`}>
+                <Card className="border-border transition-all hover:border-primary/30 hover:shadow-md cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconBgMap[category.color]}`}>
+                        <BookOpen className="h-6 w-6" />
+                      </div>
+                      <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                    </div>
+                    <div className="mt-4">
+                      <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
+                    </div>
+                    <div className="mt-4 flex items-center gap-3">
+                      <Badge variant="secondary" className="text-xs">
+                        {category.instructor}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{category.courseCount}개 강좌</span>
+                    </div>
+                    {/* 관리자 뷰: 할당된 학생 정보 표시 */}
+                    {isAdmin && category.assignedTo && category.assignedTo.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-border/50">
+                        <p className="text-xs text-muted-foreground mb-2">할당 학생:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {category.assignedTo.map((studentId) => (
+                            <Badge key={studentId} variant="outline" className="text-xs">
+                              {getStudentName(studentId)}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
+              {isAdmin && (
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="h-8 w-8 bg-white/90"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleEditOpen(category)
+                    }}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="h-8 w-8 bg-white/90 text-destructive hover:text-destructive"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleDeleteCategory(category.id)
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
 
       {/* 카테고리 편집 Dialog */}
@@ -314,6 +416,35 @@ export default function LecturesPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>대상 학생 지정</Label>
+                <div className="rounded-lg border border-border p-3 max-h-[250px] overflow-y-auto">
+                  <div className="space-y-2">
+                    {students.map((student) => (
+                      <label
+                        key={student.id}
+                        className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
+                      >
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                          checked={selectedStudents.has(student.id)}
+                          onChange={() => toggleStudent(student.id)}
+                        />
+                        <span className="text-sm text-foreground">
+                          {student.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {student.grade}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {selectedStudents.size}명 선택됨
+                </p>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
