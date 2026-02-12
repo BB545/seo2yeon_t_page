@@ -103,7 +103,6 @@ export interface LectureCategory {
   instructor: string
   thumbnail: string
   courseCount: number
-  color: string
   assignedTo?: string[]
 }
 
@@ -143,7 +142,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "박선생",
     thumbnail: "",
     courseCount: 3,
-    color: "bg-blue-500",
   },
   {
     id: "cat-2",
@@ -152,7 +150,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "이선생",
     thumbnail: "",
     courseCount: 2,
-    color: "bg-emerald-500",
   },
   {
     id: "cat-3",
@@ -161,7 +158,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "최선생",
     thumbnail: "",
     courseCount: 2,
-    color: "bg-amber-500",
   },
   {
     id: "cat-4",
@@ -170,7 +166,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "김선생",
     thumbnail: "",
     courseCount: 3,
-    color: "bg-rose-500",
   },
 ]
 

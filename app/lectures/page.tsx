@@ -27,26 +27,10 @@ import { BookOpen, ArrowRight, Plus, Pencil, Trash2 } from "lucide-react"
 import { lectureCategories, LectureCategory, students } from "@/lib/mock-data"
 import { useAuth } from "@/lib/auth-context"
 
-const colorOptions = ["bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"]
-const colorNameMap: Record<string, string> = {
-  "bg-blue-500": "파란색",
-  "bg-emerald-500": "초록색",
-  "bg-amber-500": "주황색",
-  "bg-rose-500": "빨간색",
-}
-
-const iconBgMap: Record<string, string> = {
-  "bg-blue-500": "bg-blue-500/10 text-blue-600",
-  "bg-emerald-500": "bg-emerald-500/10 text-emerald-600",
-  "bg-amber-500": "bg-amber-500/10 text-amber-600",
-  "bg-rose-500": "bg-rose-500/10 text-rose-600",
-}
-
 interface CategoryFormData {
   name: string
   description: string
   instructor: string
-  color: string
   assignedTo: string[]
 }
 
@@ -59,7 +43,6 @@ export default function LecturesPage() {
     name: "",
     description: "",
     instructor: "",
-    color: "bg-blue-500",
     assignedTo: [],
   })
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set())
@@ -96,16 +79,14 @@ export default function LecturesPage() {
       instructor: formData.instructor,
       thumbnail: "",
       courseCount: 0,
-      color: formData.color,
       assignedTo: Array.from(selectedStudents),
     }
 
     lectureCategories.push(newCategory)
-    setFormData({ 
-      name: "", 
-      description: "", 
-      instructor: "", 
-      color: "bg-blue-500",
+    setFormData({
+      name: "",
+      description: "",
+      instructor: "",
       assignedTo: []
     })
     setSelectedStudents(new Set())
@@ -119,7 +100,6 @@ export default function LecturesPage() {
       name: category.name,
       description: category.description,
       instructor: category.instructor,
-      color: category.color,
       assignedTo: category.assignedTo || [],
     })
     setSelectedStudents(new Set(category.assignedTo || []))
@@ -135,7 +115,6 @@ export default function LecturesPage() {
       category.name = formData.name
       category.description = formData.description
       category.instructor = formData.instructor
-      category.color = formData.color
       category.assignedTo = Array.from(selectedStudents)
     }
     setEditingId(null)
@@ -172,7 +151,7 @@ export default function LecturesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">복습 영상</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isAdmin 
+            {isAdmin
               ? "강의 카테고리를 관리합니다."
               : "강의 카테고리를 선택하여 복습 영상을 시청하세요."}
           </p>
@@ -225,21 +204,6 @@ export default function LecturesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="cat-color">색상</Label>
-                  <Select value={formData.color} onValueChange={(color) => setFormData({ ...formData, color })}>
-                    <SelectTrigger id="cat-color">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {colorOptions.map((color) => (
-                        <SelectItem key={color} value={color}>
-                          {colorNameMap[color]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
                   <Label>대상 학생 지정 *</Label>
                   <div className="rounded-lg border border-border p-3 max-h-[250px] overflow-y-auto">
                     <div className="space-y-2">
@@ -289,8 +253,8 @@ export default function LecturesPage() {
         {visibleCategories.length === 0 ? (
           <div className="col-span-full py-12 text-center">
             <p className="text-sm text-muted-foreground">
-              {isAdmin 
-                ? "카테고리가 없습니다." 
+              {isAdmin
+                ? "카테고리가 없습니다."
                 : "현재 할당된 강의 카테고리가 없습니다."}
             </p>
           </div>
@@ -301,25 +265,22 @@ export default function LecturesPage() {
                 <Card className="border-border transition-all hover:border-primary/30 hover:shadow-md cursor-pointer">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconBgMap[category.color]}`}>
-                        <BookOpen className="h-6 w-6" />
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
                       </div>
                       <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
                     </div>
-                    <div className="mt-4">
-                      <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
-                    </div>
                     <div className="mt-4 flex items-center gap-3">
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge className="border-transparent text-secondary-foreground text-xs bg-violet-100 hover:bg-violet-100">
                         {category.instructor}
                       </Badge>
                       <span className="text-xs text-muted-foreground">{category.courseCount}개 강좌</span>
                     </div>
                     {/* 관리자 뷰: 할당된 학생 정보 표시 */}
-                    {isAdmin && category.assignedTo && category.assignedTo.length > 0 && (
+                    {isAdmin && category.assignedTo && category.assignedTo.length > 0 ? (
                       <div className="mt-3 pt-3 border-t border-border/50">
-                        <p className="text-xs text-muted-foreground mb-2">할당 학생:</p>
+                        <p className="text-xs text-muted-foreground mb-2">지정된 학생:</p>
                         <div className="flex flex-wrap gap-1">
                           {category.assignedTo.map((studentId) => (
                             <Badge key={studentId} variant="outline" className="text-xs">
@@ -328,12 +289,19 @@ export default function LecturesPage() {
                           ))}
                         </div>
                       </div>
+                    ) : (
+                      <div className="mt-3 pt-3 border-t border-border/50">
+                        <p className="text-xs text-muted-foreground mb-2">지정된 학생:</p>
+                        <span className="text-xs text-muted-foreground">
+                          전체 공개 (제한 없음)
+                        </span>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
               </Link>
               {isAdmin && (
-                <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="absolute bottom-5 right-5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                   <Button
                     size="icon"
                     variant="outline"
@@ -401,21 +369,6 @@ export default function LecturesPage() {
                   value={formData.instructor}
                   onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-cat-color">색상</Label>
-                <Select value={formData.color} onValueChange={(color) => setFormData({ ...formData, color })}>
-                  <SelectTrigger id="edit-cat-color">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colorOptions.map((color) => (
-                      <SelectItem key={color} value={color}>
-                        {colorNameMap[color]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               <div className="space-y-2">
                 <Label>대상 학생 지정</Label>
