@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { AppLayout } from "@/components/app-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,10 +16,10 @@ import {
   Clock,
   Bell,
   Users,
-  FileCheck,
   Shield,
+  X,
 } from "lucide-react"
-import { assignments, qnaPosts, consultations, students, submissions } from "@/lib/mock-data"
+import { type Student, assignments, qnaPosts, consultations, students, submissions } from "@/lib/mock-data"
 import { useAuth } from "@/lib/auth-context"
 
 function StatCard({
@@ -27,19 +27,23 @@ function StatCard({
   label,
   value,
   color,
+  onClick,
+  href,
 }: {
   icon: React.ElementType
   label: string
   value: string
   color: string
+  onClick?: () => void
+  href?: string
 }) {
-  return (
-    <Card className="border-border">
+  const content = (
+    <Card className="border-border cursor-pointer transition-all hover:shadow-md hover:border-violet-500/50">
       <CardContent className="flex items-center gap-4 p-5">
         <div
-          className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${color}`}
+          className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border-2 ${color}`}
         >
-          <Icon className="h-6 w-6 text-primary-foreground" />
+          <Icon className={`h-6 w-6 ${color}`} />
         </div>
         <div>
           <p className="text-sm text-muted-foreground">{label}</p>
@@ -48,6 +52,16 @@ function StatCard({
       </CardContent>
     </Card>
   )
+
+  if (href) {
+    return <Link href={href}>{content}</Link>
+  }
+
+  if (onClick) {
+    return <div onClick={onClick}>{content}</div>
+  }
+
+  return content
 }
 
 function StudentDashboard() {
@@ -59,25 +73,38 @@ function StudentDashboard() {
     <>
       {/* Stats */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={ClipboardList}
-          label="진행중 과제"
-          value={`${pendingAssignments}건`}
-          color="bg-primary"
-        />
-        <StatCard
-          icon={MessageSquareMore}
-          label="내 질문"
-          value={`${myQnaPosts.length}건`}
-          color="bg-emerald-500"
-        />
-        <StatCard
-          icon={GraduationCap}
-          label="상담 내역"
-          value={`${myConsultations.length}건`}
-          color="bg-amber-500"
-        />
-        <StatCard icon={Video} label="수강 강좌" value="4개" color="bg-rose-500" />
+        <Link href="/assignments">
+          <StatCard
+            icon={ClipboardList}
+            label="진행중 과제"
+            value={`${pendingAssignments}건`}
+            color="border-primary text-primary"
+          />
+        </Link>
+        <Link href="/my-qna">
+          <StatCard
+            icon={MessageSquareMore}
+            label="내 질문"
+            value={`${myQnaPosts.length}건`}
+            color="border-emerald-500 text-emerald-500"
+          />
+        </Link>
+        <Link href="/my-consultation">
+          <StatCard
+            icon={GraduationCap}
+            label="상담 내역"
+            value={`${myConsultations.length}건`}
+            color="border-amber-500 text-amber-500"
+          />
+        </Link>
+        <Link href="/lectures">
+          <StatCard
+            icon={Video}
+            label="수강 강좌"
+            value="4개"
+            color="border-rose-500 text-rose-500"
+          />
+        </Link>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -89,9 +116,9 @@ function StudentDashboard() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-1 text-muted-foreground"
+                className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600"
               >
-                전체보기 <ArrowRight className="h-3.5 w-3.5" />
+                전체보기 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </Link>
           </CardHeader>
@@ -130,13 +157,13 @@ function StudentDashboard() {
         <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base font-semibold">최근 질의응답</CardTitle>
-            <Link href="/qna">
+            <Link href="/my-qna">
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-1 text-muted-foreground"
+                className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600"
               >
-                전체보기 <ArrowRight className="h-3.5 w-3.5" />
+                전체보기 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </Link>
           </CardHeader>
@@ -222,10 +249,79 @@ function StudentDashboard() {
   )
 }
 
+function StudentListModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const studentsByGrade = students.reduce(
+    (acc, student) => {
+      const grade = student.grade || "미지정"
+      if (!acc[grade]) {
+        acc[grade] = []
+      }
+      acc[grade].push(student)
+      return acc
+    },
+    {} as Record<string, Student[]>
+  )
+
+  const sortedGrades = Object.keys(studentsByGrade).sort((a, b) => {
+    if (a === "미지정") return 1
+    if (b === "미지정") return -1
+    return a.localeCompare(b)
+  })
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between border-b">
+          <CardTitle>등록 학생 목록</CardTitle>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </CardHeader>
+        <CardContent className="flex-1 overflow-y-auto p-0">
+          {sortedGrades.map((grade) => (
+            <div key={grade} className="border-b last:border-b-0">
+              <div className="sticky top-0 bg-muted/50 px-6 py-3 font-semibold text-sm">
+                {grade}
+              </div>
+              <div className="divide-y">
+                {studentsByGrade[grade].map((student) => (
+                  <div
+                    key={student.id}
+                    className="flex items-center justify-between px-6 py-3 hover:bg-muted/30 transition-colors"
+                  >
+                    <div>
+                      <p className="font-medium text-foreground">{student.name}</p>
+                      <p className="text-xs text-muted-foreground">ID: {student.id}</p>
+                    </div>
+                    <Badge className="text-xs bg-violet-200 text-secondary-foreground hover:bg-violet-200 border-transparent">
+                      {student.grade}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 function AdminDashboard() {
+  const [isStudentModalOpen, setIsStudentModalOpen] = useState(false)
   const totalStudents = students.length
   const totalAssignments = assignments.length
-  const totalSubmissions = submissions.length
   const pendingQna = qnaPosts.filter((q) => !q.answer).length
   const pendingConsultations = consultations.filter(
     (c) => c.status !== "답변완료"
@@ -235,31 +331,44 @@ function AdminDashboard() {
     <>
       {/* Stats */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={Users}
-          label="등록 학생"
-          value={`${totalStudents}명`}
-          color="bg-primary"
-        />
-        <StatCard
-          icon={ClipboardList}
-          label="전체 과제"
-          value={`${totalAssignments}건`}
-          color="bg-emerald-500"
-        />
-        <StatCard
-          icon={MessageSquareMore}
-          label="미답변 질문"
-          value={`${pendingQna}건`}
-          color="bg-amber-500"
-        />
-        <StatCard
-          icon={GraduationCap}
-          label="진행중 상담"
-          value={`${pendingConsultations}건`}
-          color="bg-rose-500"
-        />
+        <div onClick={() => setIsStudentModalOpen(true)}>
+          <StatCard
+            icon={Users}
+            label="등록 학생"
+            value={`${totalStudents}명`}
+            color="border-primary text-primary"
+          />
+        </div>
+        <Link href="/assignments">
+          <StatCard
+            icon={ClipboardList}
+            label="전체 과제"
+            value={`${totalAssignments}건`}
+            color="border-emerald-500 text-emerald-500"
+          />
+        </Link>
+        <Link href="/qna">
+          <StatCard
+            icon={MessageSquareMore}
+            label="미답변 질문"
+            value={`${pendingQna}건`}
+            color="border-amber-500 text-amber-500"
+          />
+        </Link>
+        <Link href="/consultation">
+          <StatCard
+            icon={GraduationCap}
+            label="진행중 상담"
+            value={`${pendingConsultations}건`}
+            color="border-rose-500 text-rose-500"
+          />
+        </Link>
       </div>
+
+      <StudentListModal
+        isOpen={isStudentModalOpen}
+        onClose={() => setIsStudentModalOpen(false)}
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent submissions */}
@@ -270,9 +379,9 @@ function AdminDashboard() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-1 text-muted-foreground"
+                className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600"
               >
-                전체보기 <ArrowRight className="h-3.5 w-3.5" />
+                전체보기 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </Link>
           </CardHeader>
@@ -317,9 +426,9 @@ function AdminDashboard() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-1 text-muted-foreground"
+                className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600"
               >
-                전체보기 <ArrowRight className="h-3.5 w-3.5" />
+                전체보기 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </Link>
           </CardHeader>
@@ -358,9 +467,9 @@ function AdminDashboard() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-1 text-muted-foreground"
+                className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600"
               >
-                전체보기 <ArrowRight className="h-3.5 w-3.5" />
+                전체보기 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
               </Button>
             </Link>
           </CardHeader>
@@ -409,10 +518,15 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-foreground">
             안녕하세요, {user.name}님
           </h1>
-          {isAdmin && (
-            <Badge className="gap-1 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10">
+          {isAdmin ? (
+            <Badge className="gap-1 bg-rose-500/10 text-rose-600 hover:bg-rose-500/10">
               <Shield className="h-3 w-3" />
               관리자
+            </Badge>
+          ) : (
+            <Badge className="gap-0.5 bg-violet-500/10 px-1.5 py-0 text-[10px] text-violet-600 hover:bg-violet-500/10">
+              <GraduationCap className="h-2.5 w-2.5" />
+              학생
             </Badge>
           )}
         </div>
