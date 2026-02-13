@@ -144,10 +144,15 @@ export function SidebarNav() {
             <div className="flex-1 overflow-hidden">
               <div className="flex items-center gap-1.5">
                 <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
-                {isAdmin && (
+                {isAdmin ? (
                   <Badge className="gap-0.5 bg-rose-500/10 px-1.5 py-0 text-[10px] text-rose-600 hover:bg-rose-500/10">
                     <Shield className="h-2.5 w-2.5" />
                     관리자
+                  </Badge>
+                ) : (
+                  <Badge className="gap-0.5 bg-violet-500/10 px-1.5 py-0 text-[10px] text-violet-600 hover:bg-violet-500/10">
+                    <GraduationCap className="h-2.5 w-2.5" />
+                    학생
                   </Badge>
                 )}
               </div>
