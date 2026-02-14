@@ -163,6 +163,7 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "박선생",
     thumbnail: "",
     courseCount: 3,
+    assignedTo: ["user-1", "user-2", "user-3"],
   },
   {
     id: "cat-2",
