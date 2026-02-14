@@ -199,7 +199,7 @@ function QnaPostItem({
                       </div>
                       {/* Answer edit/delete buttons for admin */}
                       {isAdmin && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-1">
                           <Dialog open={editAnswerOpen} onOpenChange={setEditAnswerOpen}>
                             <DialogTrigger asChild>
                               <Button size="sm" variant="outline" className="h-7 w-7 bg-white/90 text-destructive hover:text-destructive">
