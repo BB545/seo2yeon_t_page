@@ -451,7 +451,7 @@ export default function QnaPage() {
                 </div>
                 <div className="flex items-center gap-2 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
                   <Lock className="h-4 w-4 flex-shrink-0" />
-                  <span>작성된 글은 비공개로 처리되며, 글 작성자와 관리자만 확인할 수 있습니다.</span>
+                  <span>작성된 글은 비공개로 처리되며, 글 작성자와 선생님만 확인할 수 있습니다.</span>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
@@ -474,7 +474,7 @@ export default function QnaPage() {
           ) : (
             <>
               모든 게시글은 <strong>비공개</strong>로 처리됩니다. 작성자의 이름은 익명으로 표시되며,
-              글 내용은 작성자 본인과 관리자만 확인할 수 있습니다.
+              글 내용은 작성자 본인과 선생님만 확인할 수 있습니다.
             </>
           )}
         </p>
