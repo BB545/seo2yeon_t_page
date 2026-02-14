@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { AppLayout } from "@/components/app-layout"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus, Lock, Search, ChevronDown, ChevronUp, EyeOff, MessageSquare } from "lucide-react"
+import { Plus, Lock, Search, ChevronDown, ChevronUp, EyeOff, MessageSquare, Trash2, Pencil } from "lucide-react"
 import { qnaPosts, type QnaPost } from "@/lib/mock-data"
 import { useAuth } from "@/lib/auth-context"
 
@@ -25,9 +25,37 @@ function maskName(name: string): string {
   return name.charAt(0) + "**"
 }
 
-function QnaPostItem({ post, currentUserId, isAdmin }: { post: QnaPost; currentUserId: string; isAdmin: boolean }) {
+function QnaPostItem({
+  post,
+  currentUserId,
+  isAdmin,
+  onUpdateQuestion,
+  onDeleteQuestion,
+  onUpdateAnswer,
+  onDeleteAnswer,
+  posts
+}: {
+  post: QnaPost
+  currentUserId: string
+  isAdmin: boolean
+  onUpdateQuestion: (postId: string, title: string, content: string) => void
+  onDeleteQuestion: (postId: string) => void
+  onUpdateAnswer: (postId: string, answer: string) => void
+  onDeleteAnswer: (postId: string) => void
+  posts: QnaPost[]
+}) {
   const [expanded, setExpanded] = useState(false)
   const [answerOpen, setAnswerOpen] = useState(false)
+  const [editQuestionOpen, setEditQuestionOpen] = useState(false)
+  const [editAnswerOpen, setEditAnswerOpen] = useState(false)
+  const [editTitle, setEditTitle] = useState(post.title)
+  const [editContent, setEditContent] = useState(post.content)
+  const [editAnswer, setEditAnswer] = useState(post.answer || "")
+  const [answerText, setAnswerText] = useState("")
+
+  const titleInputRef = useRef<HTMLInputElement>(null)
+  const answerTextareaRef = useRef<HTMLTextAreaElement>(null)
+
   const isOwner = post.authorId === currentUserId
   const canView = isOwner || isAdmin
 
@@ -82,55 +110,209 @@ function QnaPostItem({ post, currentUserId, isAdmin }: { post: QnaPost; currentU
                 <div className="rounded-lg bg-muted/50 p-3">
                   <p className="text-sm leading-relaxed text-foreground">{post.content}</p>
                 </div>
+
+                {/* Question edit/delete buttons for owner */}
+                {isOwner && (
+                  <div className="mt-2 flex gap-2 justify-end">
+                    <Dialog open={editQuestionOpen} onOpenChange={setEditQuestionOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" variant="outline" className="gap-1.5">
+                          <Pencil className="h-3.5 w-3.5" />
+                          수정
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent
+                        className="sm:max-w-lg"
+                        onOpenAutoFocus={(e) => {
+                          e.preventDefault() // Radix 기본 auto focus 막기
+
+                          if (titleInputRef.current) {
+                            const length = titleInputRef.current.value.length
+                            titleInputRef.current.focus()
+                            titleInputRef.current.setSelectionRange(length, length)
+                          }
+                        }}
+                      >
+                        <DialogHeader>
+                          <DialogTitle>질문 수정</DialogTitle>
+                          <DialogDescription>질문 내용을 수정하세요</DialogDescription>
+                        </DialogHeader>
+                        <form
+                          className="space-y-4"
+                          onSubmit={(e) => {
+                            e.preventDefault()
+                            onUpdateQuestion(post.id, editTitle, editContent)
+                            setEditQuestionOpen(false)
+                          }}
+                        >
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-qna-title">제목</Label>
+                            <Input
+                              ref={titleInputRef}
+                              id="edit-qna-title"
+                              value={editTitle}
+                              onChange={(e) => setEditTitle(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-qna-content">내용</Label>
+                            <Textarea
+                              id="edit-qna-content"
+                              value={editContent}
+                              onChange={(e) => setEditContent(e.target.value)}
+                              className="min-h-[150px]"
+                            />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button type="button" variant="outline" onClick={() => setEditQuestionOpen(false)}>
+                              취소
+                            </Button>
+                            <Button type="submit">수정 완료</Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-destructive hover:text-destructive"
+                      onClick={() => {
+                        if (confirm("질문을 삭제하시겠습니까?")) {
+                          onDeleteQuestion(post.id)
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      삭제
+                    </Button>
+                  </div>
+                )}
+
                 {post.answer && (
-                  <div className="mt-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
-                    <div className="mb-1 flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        관리자 답변
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">{post.answeredAt}</span>
+                  <div className="mt-3 rounded-lg border border-purple-500/20 bg-purple-500/5 p-3">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs bg-pink-500/10 text-pink-600 hover:bg-pink-500/10">
+                          선생님 답변
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">{post.answeredAt}</span>
+                      </div>
+                      {/* Answer edit/delete buttons for admin */}
+                      {isAdmin && (
+                        <div className="flex gap-2">
+                          <Dialog open={editAnswerOpen} onOpenChange={setEditAnswerOpen}>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="h-7 w-7 bg-white/90 text-destructive hover:text-destructive">
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent
+                              className="sm:max-w-lg"
+                              onOpenAutoFocus={(e) => {
+                                e.preventDefault()
+
+                                if (answerTextareaRef.current) {
+                                  const length = answerTextareaRef.current.value.length
+                                  answerTextareaRef.current.focus()
+                                  answerTextareaRef.current.setSelectionRange(length, length)
+                                }
+                              }}
+                            >
+                              <DialogHeader>
+                                <DialogTitle>답변 수정</DialogTitle>
+                                <DialogDescription>{post.title}</DialogDescription>
+                              </DialogHeader>
+                              <form
+                                className="space-y-4"
+                                onSubmit={(e) => {
+                                  e.preventDefault()
+                                  onUpdateAnswer(post.id, editAnswer)
+                                  setEditAnswerOpen(false)
+                                }}
+                              >
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-answer-content">답변 내용</Label>
+                                  <Textarea
+                                    ref={answerTextareaRef}
+                                    id="edit-answer-content"
+                                    value={editAnswer}
+                                    onChange={(e) => setEditAnswer(e.target.value)}
+                                    className="min-h-[150px]"
+                                  />
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                  <Button type="button" variant="outline" onClick={() => setEditAnswerOpen(false)}>
+                                    취소
+                                  </Button>
+                                  <Button type="submit">수정 완료</Button>
+                                </div>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 w-7 p-0 bg-white/90 text-destructive hover:text-destructive"
+                            onClick={() => {
+                              if (confirm("답변을 삭제하시겠습니까?")) {
+                                onDeleteAnswer(post.id)
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <p className="text-sm leading-relaxed text-foreground">{post.answer}</p>
                   </div>
                 )}
                 {/* Admin answer button */}
                 {isAdmin && !post.answer && (
-                  <Dialog open={answerOpen} onOpenChange={setAnswerOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="mt-3 gap-1.5">
-                        <MessageSquare className="h-3.5 w-3.5" />
-                        답변 작성
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-lg">
-                      <DialogHeader>
-                        <DialogTitle>답변 작성</DialogTitle>
-                        <DialogDescription>{post.title}</DialogDescription>
-                      </DialogHeader>
-                      <form
-                        className="space-y-4"
-                        onSubmit={(e) => {
-                          e.preventDefault()
-                          setAnswerOpen(false)
-                        }}
-                      >
-                        <div className="space-y-2">
-                          <Label htmlFor="answer-content">답변 내용</Label>
-                          <Textarea
-                            id="answer-content"
-                            placeholder="답변을 작성하세요"
-                            className="min-h-[150px]"
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button type="button" variant="outline" onClick={() => setAnswerOpen(false)}>
-                            취소
-                          </Button>
-                          <Button type="submit">답변 등록</Button>
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                  <div className="mt-3 flex justify-end">
+                    <Dialog open={answerOpen} onOpenChange={setAnswerOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" className="gap-1.5">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          답변 작성
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-lg">
+                        <DialogHeader>
+                          <DialogTitle>답변 작성</DialogTitle>
+                          <DialogDescription>{post.title}</DialogDescription>
+                        </DialogHeader>
+                        <form
+                          className="space-y-4"
+                          onSubmit={(e) => {
+                            e.preventDefault()
+                            if (answerText.trim()) {
+                              onUpdateAnswer(post.id, answerText)
+                              setAnswerText("")
+                              setAnswerOpen(false)
+                            }
+                          }}
+                        >
+                          <div className="space-y-2">
+                            <Label htmlFor="answer-content">답변 내용</Label>
+                            <Textarea
+                              id="answer-content"
+                              placeholder="답변을 작성하세요"
+                              value={answerText}
+                              onChange={(e) => setAnswerText(e.target.value)}
+                              className="min-h-[150px]"
+                            />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button type="button" variant="outline" onClick={() => setAnswerOpen(false)}>
+                              취소
+                            </Button>
+                            <Button type="submit">답변 등록</Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 )}
               </>
             ) : (
@@ -152,14 +334,67 @@ export default function QnaPage() {
   const { user, isAdmin } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [posts, setPosts] = useState(qnaPosts)
+  const [newTitle, setNewTitle] = useState("")
+  const [newContent, setNewContent] = useState("")
 
-  const filteredPosts = qnaPosts.filter((post) => {
+  const filteredPosts = posts.filter((post) => {
     if (!searchQuery) return true
     if (isAdmin || post.authorId === user.id) {
       return post.title.includes(searchQuery) || post.content.includes(searchQuery)
     }
     return false
   })
+
+  const handleAddQuestion = () => {
+    if (newTitle.trim() && newContent.trim()) {
+      const newPost: QnaPost = {
+        id: Date.now().toString(),
+        title: newTitle,
+        content: newContent,
+        authorId: user.id,
+        authorName: user.name || "익명",
+        createdAt: new Date().toLocaleDateString("ko-KR"),
+        isPrivate: true,
+        answer: undefined,
+        answeredAt: undefined,
+      }
+      setPosts([newPost, ...posts])
+      setNewTitle("")
+      setNewContent("")
+      setDialogOpen(false)
+    }
+  }
+
+  const handleUpdateQuestion = (postId: string, title: string, content: string) => {
+    setPosts(
+      posts.map((post) =>
+        post.id === postId ? { ...post, title, content } : post
+      )
+    )
+  }
+
+  const handleDeleteQuestion = (postId: string) => {
+    setPosts(posts.filter((post) => post.id !== postId))
+  }
+
+  const handleUpdateAnswer = (postId: string, answer: string) => {
+    setPosts(
+      posts.map((post) =>
+        post.id === postId
+          ? { ...post, answer, answeredAt: new Date().toLocaleDateString("ko-KR") }
+          : post
+      )
+    )
+  }
+
+  const handleDeleteAnswer = (postId: string) => {
+    setPosts(
+      posts.map((post) =>
+        post.id === postId ? { ...post, answer: undefined, answeredAt: undefined } : post
+      )
+    )
+  }
 
   return (
     <AppLayout>
@@ -192,12 +427,17 @@ export default function QnaPage() {
                 className="space-y-4"
                 onSubmit={(e) => {
                   e.preventDefault()
-                  setDialogOpen(false)
+                  handleAddQuestion()
                 }}
               >
                 <div className="space-y-2">
                   <Label htmlFor="qna-title">제목</Label>
-                  <Input id="qna-title" placeholder="질문 제목을 입력하세요" />
+                  <Input
+                    id="qna-title"
+                    placeholder="질문 제목을 입력하세요"
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="qna-content">내용</Label>
@@ -205,6 +445,8 @@ export default function QnaPage() {
                     id="qna-content"
                     placeholder="질문 내용을 자세히 작성해주세요"
                     className="min-h-[150px]"
+                    value={newContent}
+                    onChange={(e) => setNewContent(e.target.value)}
                   />
                 </div>
                 <div className="flex items-center gap-2 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
@@ -224,14 +466,14 @@ export default function QnaPage() {
       </div>
 
       {/* Info banner */}
-      <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
-        <Lock className="h-5 w-5 flex-shrink-0 text-primary" />
+      <div className="mb-6 flex items-center gap-3 rounded-xl border border-purple-500/20 bg-purple-500/5 px-4 py-3">
+        <Lock className="h-5 w-5 flex-shrink-0 text-purple-400" />
         <p className="text-sm text-foreground">
           {isAdmin ? (
             <>관리자는 모든 질문의 내용을 확인하고 답변할 수 있습니다.</>
           ) : (
             <>
-              모든 게시글은 <strong>비공개</strong>로 처리됩니다. 작성자의 이름은 익명(성만 공개)으로 표시되며,
+              모든 게시글은 <strong>비공개</strong>로 처리됩니다. 작성자의 이름은 익명으로 표시되며,
               글 내용은 작성자 본인과 관리자만 확인할 수 있습니다.
             </>
           )}
@@ -242,7 +484,7 @@ export default function QnaPage() {
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder={isAdmin ? "질문 검색..." : "내 질문 검색..."}
+          placeholder={isAdmin ? "질문 검색" : "내 질문 검색"}
           className="pl-9"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -252,7 +494,17 @@ export default function QnaPage() {
       {/* Post list */}
       <div className="space-y-3">
         {filteredPosts.map((post) => (
-          <QnaPostItem key={post.id} post={post} currentUserId={user.id} isAdmin={isAdmin} />
+          <QnaPostItem
+            key={post.id}
+            post={post}
+            currentUserId={user.id}
+            isAdmin={isAdmin}
+            onUpdateQuestion={handleUpdateQuestion}
+            onDeleteQuestion={handleDeleteQuestion}
+            onUpdateAnswer={handleUpdateAnswer}
+            onDeleteAnswer={handleDeleteAnswer}
+            posts={posts}
+          />
         ))}
       </div>
     </AppLayout>
