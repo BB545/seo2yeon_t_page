@@ -147,7 +147,7 @@ function QnaPostItem({
                 {!canView && <Lock className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />}
               </div>
               <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{canView ? post.authorName : maskName(post.authorName)}</span>
+                <span>{canView ? post.authorName : maskName(post.authorName)} 학생</span>
                 <span>|</span>
                 <span>{post.createdAt}</span>
               </div>
