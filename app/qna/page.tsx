@@ -466,7 +466,7 @@ function QnaPostItem({
                         <div className="flex gap-1">
                           <Dialog open={editAnswerOpen} onOpenChange={setEditAnswerOpen}>
                             <DialogTrigger asChild>
-                              <Button size="sm" variant="outline" className="h-7 w-7 bg-white/90 text-destructive hover:text-destructive">
+                              <Button size="sm" variant="outline" className="h-7 w-7 bg-white/90">
                                 <Pencil className="h-3 w-3" />
                               </Button>
                             </DialogTrigger>
