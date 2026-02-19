@@ -83,11 +83,11 @@ export function SidebarNav() {
         <div className="flex items-center gap-2 border-b border-border px-6 py-5">
           <div className="flex h-8 w-8 items-center justify-center">
             <Image
-              src="/images/logo/logo_symbol_s2y.png"
-              alt="Logo"
-              width={30}
-              height={30}
-              className="h-8 w-10 text-sidebar-primary"
+              src="/images/info/seo2_img.jpg"
+              alt="imfo_img"
+              width={32}
+              height={32}
+              className="h-10 w-10 text-sidebar-primary rounded-full object-cover border border-rose-200"
             />
           </div>
           <div>

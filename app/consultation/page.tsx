@@ -17,9 +17,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Lock, ChevronDown, ChevronUp, User, EyeOff, MessageSquare, Trash2, Pencil } from "lucide-react"
+import { Plus, Lock, ChevronDown, ChevronUp, EyeOff, MessageSquare, Trash2, Pencil } from "lucide-react"
 import { consultations as initialConsultations, instructors, type Consultation } from "@/lib/mock-data"
 import { useAuth } from "@/lib/auth-context"
+import Image from "next/image"
 
 function statusColor(status: Consultation["status"]) {
   switch (status) {
@@ -517,23 +518,33 @@ export default function ConsultationPage() {
 
       {/* Instructor Section */}
       <div className="mb-8">
-        <h2 className="mb-4 text-lg font-semibold text-foreground">강사 소개</h2>
         {instructors.slice(0, 1).map((instructor) => (
           <Card key={instructor.name} className="border-border">
-            <CardContent className="p-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+            <CardContent className="px-4 py-6">
+              <div className="flex flex-row gap-16 justify-center items-start">
                 {/* Image & Name - Left side on web */}
                 <div className="text-center lg:w-48 lg:flex-shrink-0">
-                  <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                    <User className="h-8 w-8 text-primary" />
-                  </div>
+                  <Image
+                    src="/images/info/seo2_img.jpg"
+                    alt="imfo_img"
+                    width={80}
+                    height={80}
+                    className="mx-auto mb-3 flex h-20 w-20 items-center justify-center text-sidebar-primary rounded-full object-cover border border-rose-200"
+                  />
                   <h3 className="font-semibold text-foreground">{instructor.name} 선생님</h3>
                 </div>
 
                 {/* Description - Right side on web */}
-                <p className="text-sm leading-relaxed text-muted-foreground lg:flex-1">
-                  {instructor.description}
-                </p>
+                <div className="relative py-6 flex flex-col lg:flex-row gap-4 lg:gap-16 before:content-['“'] before:absolute before:-left-8 before:top-0 before:text-5xl before:text-rose-200 before:font-serif after:content-['”'] after:absolute after:-right-8 after:-bottom-6 after:text-5xl after:text-rose-200 after:font-serif">
+                  <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                    {instructor.description}
+                  </p>
+                  <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 text-left">
+                    {instructor.description2?.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </CardContent>
           </Card>
