@@ -21,7 +21,7 @@ export const currentUser: User = {
 
 export const adminUser: User = {
   id: "admin-1",
-  name: "박선생",
+  name: "서이연",
   email: "admin@example.com",
   role: "admin",
   grade: "",
@@ -160,9 +160,10 @@ export const lectureCategories: LectureCategory[] = [
     id: "cat-1",
     name: "수학",
     description: "미적분, 확률과 통계, 기하 등",
-    instructor: "박선생",
+    instructor: "서이연",
     thumbnail: "",
     courseCount: 3,
+    assignedTo: ["user-1", "user-2", "user-3"],
   },
   {
     id: "cat-2",
@@ -302,9 +303,21 @@ export const consultations: Consultation[] = [
 
 export const instructors = [
   {
-    name: "박선생",
+    name: "서이연",
     subject: "수학",
-    description: "서울대학교 수학교육과 출신, 10년 경력의 수학 전문 강사",
+    description: `한 번 보면 이해되는 수학
+    개념-응용을 연결해
+    수학적 해석력을 키웁니다.
+
+    풀이보다 '열쇠'를 준다
+    문제의 잠금 해제
+    수학 Unlonk`,
+    description2: [
+      "전) 목동 시대인재",
+      "전) 서울 사대부고 보충수업 교사",
+      "성균관대학교 수학과 졸업",
+      "성균관대학교 전자전기공학부 복수전공",
+    ],
     image: "",
   },
   {
