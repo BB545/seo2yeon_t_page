@@ -361,8 +361,6 @@ export default function ConsultationPage() {
   const [newContent, setNewContent] = useState("")
   const [consultationType, setConsultationType] = useState("")
 
-  if (!user) return null
-
   // LocalStorage에 consultations 저장
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -383,6 +381,8 @@ export default function ConsultationPage() {
       }
     }
   }, [])
+
+  if (!user) return null
 
   const handleAddConsultation = () => {
     if (newTitle.trim() && newContent.trim()) {

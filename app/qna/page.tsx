@@ -604,8 +604,6 @@ export default function QnaPage() {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  if (!user) return null
-
   // LocalStorage에 posts 저장
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -626,6 +624,8 @@ export default function QnaPage() {
       }
     }
   }, [])
+
+  if (!user) return null
 
   const filteredPosts = posts.filter((post) => {
     if (!searchQuery) return true
