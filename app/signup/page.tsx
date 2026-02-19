@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import Image from "next/image"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -23,15 +24,20 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-8">
+    <div className="flex min-h-screen items-center justify-center bg-white px-4 py-8">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
-            <BookOpen className="h-7 w-7 text-primary-foreground" />
+          <div className="flex items-center justify-center pt-10">
+            <Image
+              src="/images/logo/logo_s2y.png"
+              alt="Logo"
+              width={150}
+              height={30}
+            />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">EduManager</h1>
-          <p className="text-sm text-muted-foreground">학생 관리 시스템</p>
+          {/* <h1 className="text-2xl font-bold text-foreground">EduManager</h1>
+          <p className="text-sm text-muted-foreground">학생 관리 시스템</p> */}
         </div>
 
         <Card className="border-border shadow-sm">
@@ -51,7 +57,7 @@ export default function SignupPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">연락처</Label>
-                <Input id="phone" type="tel" placeholder="010-0000-0000" />
+                <Input id="phone" type="tel" placeholder="01012345678" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="grade">학년</Label>
@@ -109,7 +115,7 @@ export default function SignupPage() {
             </form>
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">이미 계정이 있으신가요?</span>{" "}
-              <Link href="/" className="font-medium text-primary hover:underline">
+              <Link href="/" className="font-medium text-violet-600 hover:underline">
                 로그인
               </Link>
             </div>
