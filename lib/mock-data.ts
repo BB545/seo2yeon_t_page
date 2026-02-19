@@ -39,6 +39,12 @@ export interface QnaPost {
   isPrivate: boolean
   answer?: string
   answeredAt?: string
+  attachments?: Array<{
+    name: string
+    size: number
+    type: string
+    url: string
+  }>
 }
 
 export const qnaPosts: QnaPost[] = [
@@ -52,6 +58,14 @@ export const qnaPosts: QnaPost[] = [
     isPrivate: true,
     answer: "해당 문제는 t = x+1로 치환하면 쉽게 풀 수 있습니다. 자세한 풀이는 다음 수업 시간에 설명드리겠습니다.",
     answeredAt: "2026-02-09",
+    attachments: [
+      {
+        name: "problem_screenshot.png",
+        size: 245000,
+        type: "image/png",
+        url: "https://picsum.photos/400/300",
+      },
+    ],
   },
   {
     id: "qna-2",
@@ -61,6 +75,14 @@ export const qnaPosts: QnaPost[] = [
     content: "이번 주 과제로 제출한 에세이 첨삭 부탁드립니다. 특히 결론 부분이 약한 것 같습니다.",
     createdAt: "2026-02-07",
     isPrivate: true,
+    attachments: [
+      {
+        name: "essay_draft.pdf",
+        size: 156000,
+        type: "application/pdf",
+        url: "#",
+      },
+    ],
   },
   {
     id: "qna-3",
