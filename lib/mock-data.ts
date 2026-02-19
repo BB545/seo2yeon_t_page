@@ -103,7 +103,7 @@ export interface LectureCategory {
   instructor: string
   thumbnail: string
   courseCount: number
-  color: string
+  assignedTo?: string[]
 }
 
 export interface Course {
@@ -118,7 +118,6 @@ export interface Lesson {
   courseId: string
   title: string
   videoUrl: string
-  duration: string
   timemarks: Timemark[]
   resources: Resource[]
 }
@@ -142,7 +141,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "박선생",
     thumbnail: "",
     courseCount: 3,
-    color: "bg-blue-500",
   },
   {
     id: "cat-2",
@@ -151,7 +149,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "이선생",
     thumbnail: "",
     courseCount: 2,
-    color: "bg-emerald-500",
   },
   {
     id: "cat-3",
@@ -160,7 +157,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "최선생",
     thumbnail: "",
     courseCount: 2,
-    color: "bg-amber-500",
   },
   {
     id: "cat-4",
@@ -169,21 +165,20 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "김선생",
     thumbnail: "",
     courseCount: 3,
-    color: "bg-rose-500",
   },
 ]
 
 export const courses: Course[] = [
-  { id: "course-1", categoryId: "cat-1", name: "미적분 기초반", lessonCount: 12 },
-  { id: "course-2", categoryId: "cat-1", name: "확률과 통계", lessonCount: 8 },
-  { id: "course-3", categoryId: "cat-1", name: "기하 심화반", lessonCount: 10 },
-  { id: "course-4", categoryId: "cat-2", name: "수능 독해 마스터", lessonCount: 15 },
-  { id: "course-5", categoryId: "cat-2", name: "영문법 완성", lessonCount: 10 },
-  { id: "course-6", categoryId: "cat-3", name: "문학 개념 정리", lessonCount: 8 },
-  { id: "course-7", categoryId: "cat-3", name: "비문학 독해 전략", lessonCount: 12 },
-  { id: "course-8", categoryId: "cat-4", name: "물리학 I", lessonCount: 10 },
-  { id: "course-9", categoryId: "cat-4", name: "화학 I", lessonCount: 12 },
-  { id: "course-10", categoryId: "cat-4", name: "생명과학 I", lessonCount: 8 },
+  { id: "course-1", categoryId: "cat-1", name: "미적분 기초반", lessonCount: 3 },
+  { id: "course-2", categoryId: "cat-1", name: "확률과 통계", lessonCount: 0 },
+  { id: "course-3", categoryId: "cat-1", name: "기하 심화반", lessonCount: 0 },
+  { id: "course-4", categoryId: "cat-2", name: "수능 독해 마스터", lessonCount: 0 },
+  { id: "course-5", categoryId: "cat-2", name: "영문법 완성", lessonCount: 0 },
+  { id: "course-6", categoryId: "cat-3", name: "문학 개념 정리", lessonCount: 0 },
+  { id: "course-7", categoryId: "cat-3", name: "비문학 독해 전략", lessonCount: 0 },
+  { id: "course-8", categoryId: "cat-4", name: "물리학 I", lessonCount: 0 },
+  { id: "course-9", categoryId: "cat-4", name: "화학 I", lessonCount: 0 },
+  { id: "course-10", categoryId: "cat-4", name: "생명과학 I", lessonCount: 0 },
 ]
 
 export const lessons: Lesson[] = [
@@ -192,7 +187,6 @@ export const lessons: Lesson[] = [
     courseId: "course-1",
     title: "함수의 극한과 연속",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    duration: "45:30",
     timemarks: [
       { time: "00:00", label: "도입 - 함수의 극한 개념" },
       { time: "05:20", label: "극한값의 계산" },
@@ -210,7 +204,6 @@ export const lessons: Lesson[] = [
     courseId: "course-1",
     title: "미분의 정의와 기본 공식",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    duration: "50:15",
     timemarks: [
       { time: "00:00", label: "미분의 정의" },
       { time: "10:30", label: "기본 미분 공식" },
@@ -227,7 +220,6 @@ export const lessons: Lesson[] = [
     courseId: "course-1",
     title: "도함수의 활용",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    duration: "42:00",
     timemarks: [
       { time: "00:00", label: "접선의 방정식" },
       { time: "12:00", label: "함수의 증가와 감소" },
