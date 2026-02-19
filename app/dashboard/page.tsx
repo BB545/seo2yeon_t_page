@@ -14,10 +14,10 @@ import {
   ArrowRight,
   CalendarDays,
   Clock,
-  Bell,
   Users,
   Shield,
   X,
+  User,
 } from "lucide-react"
 import { type Student, assignments, qnaPosts, consultations, students, submissions } from "@/lib/mock-data"
 import { useAuth } from "@/lib/auth-context"
@@ -196,53 +196,23 @@ function StudentDashboard() {
           </CardContent>
         </Card>
 
-        {/* Notifications */}
+        {/* My Profile */}
         <Card className="border-border lg:col-span-2">
-          <CardHeader className="flex flex-row items-center gap-2">
-            <Bell className="h-5 w-5 text-primary" />
-            <CardTitle className="text-base font-semibold">알림</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              <CardTitle className="text-base font-semibold">내 정보</CardTitle>
+            </div>
+            <Link href="/mypage">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600"
+              >
+                수정하기 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+              </Button>
+            </Link>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3">
-              <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-                <Clock className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  미적분 연습문제 마감이 6일 남았습니다
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  과제 제출 기한: 2026-02-15
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3">
-              <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
-                <MessageSquareMore className="h-4 w-4 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  질문에 대한 답변이 등록되었습니다
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  수학 미적분 문제 질문드립니다 - 답변완료
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3">
-              <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-500/10">
-                <GraduationCap className="h-4 w-4 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  학습 상담 답변이 완료되었습니다
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  수학 학습 방향 상담 요청합니다 - 답변완료
-                </p>
-              </div>
-            </div>
-          </CardContent>
         </Card>
       </div>
     </>
