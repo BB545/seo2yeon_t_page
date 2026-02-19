@@ -5,7 +5,7 @@ import type { User } from "@/lib/mock-data"
 import { currentUser, adminUser } from "@/lib/mock-data"
 
 interface AuthContextType {
-  user: User
+  user: User | null
   isAdmin: boolean
   login: (role: "student" | "admin") => void
   logout: () => void
@@ -14,13 +14,13 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User>(() => {
+  const [user, setUser] = useState<User | null>(() => {
     if (typeof window !== "undefined") {
       const saved = sessionStorage.getItem("edu-user-role")
       if (saved === "admin") return adminUser
       if (saved === "student") return currentUser
     }
-    return currentUser
+    return null
   })
 
   const login = useCallback((role: "student" | "admin") => {
@@ -32,14 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const logout = useCallback(() => {
-    setUser(currentUser)
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("edu-user-role")
-    }
+    setUser(null)
+    sessionStorage.removeItem("edu-user-role")
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin: user.role === "admin", login, logout }}>
+    <AuthContext.Provider value={{ user, isAdmin: user?.role === "admin", login, logout }}>
       {children}
     </AuthContext.Provider>
   )

@@ -1075,5 +1075,8 @@ function AdminView() {
 
 export default function AssignmentsPage() {
   const { isAdmin, user } = useAuth()
-  return <AppLayout>{isAdmin ? <AdminView /> : <StudentView currentUserId={user.id} />}</AppLayout>
+
+  if (!user) return null
+  
+  return <AppLayout>{isAdmin ? <AdminView /> : <StudentView currentUserId={user?.id || ""} />}</AppLayout>
 }

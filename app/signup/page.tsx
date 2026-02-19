@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useEffect } from "react"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -11,11 +11,39 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import Image from "next/image"
 
 export default function SignupPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [passwordMessage, setPasswordMessage] = useState("")
+  const [isPasswordMatch, setIsPasswordMatch] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (!password && !confirmPassword) {
+      setPasswordMessage("")
+      setIsPasswordMatch(null)
+      return
+    }
+
+    if (confirmPassword.length === 0) {
+      setPasswordMessage("")
+      setIsPasswordMatch(null)
+      return
+    }
+
+    if (password === confirmPassword) {
+      setPasswordMessage("비밀번호가 일치합니다.")
+      setIsPasswordMatch(true)
+    } else {
+      setPasswordMessage("비밀번호가 일치하지 않습니다.")
+      setIsPasswordMatch(false)
+    }
+  }, [password, confirmPassword])
+
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,15 +51,20 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-8">
+    <div className="flex min-h-screen items-center justify-center bg-white px-4 py-8">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
-            <BookOpen className="h-7 w-7 text-primary-foreground" />
+          <div className="flex items-center justify-center pt-10">
+            <Image
+              src="/images/logo/logo_s2y.png"
+              alt="Logo"
+              width={150}
+              height={30}
+            />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">EduManager</h1>
-          <p className="text-sm text-muted-foreground">학생 관리 시스템</p>
+          {/* <h1 className="text-2xl font-bold text-foreground">EduManager</h1>
+          <p className="text-sm text-muted-foreground">학생 관리 시스템</p> */}
         </div>
 
         <Card className="border-border shadow-sm">
@@ -51,7 +84,7 @@ export default function SignupPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">연락처</Label>
-                <Input id="phone" type="tel" placeholder="010-0000-0000" />
+                <Input id="phone" type="tel" placeholder="01012345678" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="grade">학년</Label>
@@ -76,6 +109,8 @@ export default function SignupPage() {
                     id="signup-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="비밀번호를 입력하세요"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -93,6 +128,8 @@ export default function SignupPage() {
                     id="confirm-password"
                     type={showConfirm ? "text" : "password"}
                     placeholder="비밀번호를 다시 입력하세요"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -102,6 +139,14 @@ export default function SignupPage() {
                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {passwordMessage && (
+                  <p
+                    className={`text-sm mt-2 ${isPasswordMatch ? "text-emerald-600" : "text-red-600"
+                      }`}
+                  >
+                    {passwordMessage}
+                  </p>
+                )}
               </div>
               <Button type="submit" className="w-full">
                 회원가입
@@ -109,7 +154,7 @@ export default function SignupPage() {
             </form>
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">이미 계정이 있으신가요?</span>{" "}
-              <Link href="/" className="font-medium text-primary hover:underline">
+              <Link href="/" className="font-medium text-violet-600 hover:underline">
                 로그인
               </Link>
             </div>

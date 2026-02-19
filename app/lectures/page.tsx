@@ -48,6 +48,8 @@ export default function LecturesPage() {
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set())
   const [refreshKey, setRefreshKey] = useState(0)
 
+  if (!user) return null
+
   // 학생 이름 가져오기 (ID로)
   const getStudentName = (studentId: string) => {
     const student = students.find((s) => s.id === studentId)
@@ -278,24 +280,26 @@ export default function LecturesPage() {
                       <span className="text-xs text-muted-foreground">{category.courseCount}개 강좌</span>
                     </div>
                     {/* 관리자 뷰: 할당된 학생 정보 표시 */}
-                    {isAdmin && category.assignedTo && category.assignedTo.length > 0 ? (
-                      <div className="mt-3 pt-3 border-t border-border/50">
-                        <p className="text-xs text-muted-foreground mb-2">지정된 학생:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {category.assignedTo.map((studentId) => (
-                            <Badge key={studentId} variant="outline" className="text-xs">
-                              {getStudentName(studentId)}
-                            </Badge>
-                          ))}
+                    {isAdmin && (
+                      category.assignedTo && category.assignedTo.length > 0 ? (
+                        <div className="mt-3 pt-3 border-t border-border/50">
+                          <p className="text-xs text-muted-foreground mb-2">지정된 학생:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {category.assignedTo.map((studentId) => (
+                              <Badge key={studentId} variant="outline" className="text-xs">
+                                {getStudentName(studentId)}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="mt-3 pt-3 border-t border-border/50">
-                        <p className="text-xs text-muted-foreground mb-2">지정된 학생:</p>
-                        <span className="text-xs text-muted-foreground">
-                          전체 공개 (제한 없음)
-                        </span>
-                      </div>
+                      ) : (
+                        <div className="mt-3 pt-3 border-t border-border/50">
+                          <p className="text-xs text-muted-foreground mb-2">지정된 학생:</p>
+                          <span className="text-xs text-muted-foreground">
+                            지정된 학생이 없습니다. (접근 제한됨)
+                          </span>
+                        </div>
+                      )
                     )}
                   </CardContent>
                 </Card>

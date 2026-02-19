@@ -625,9 +625,11 @@ export default function QnaPage() {
     }
   }, [])
 
+  if (!user) return null
+
   const filteredPosts = posts.filter((post) => {
     if (!searchQuery) return true
-    if (isAdmin || post.authorId === user.id) {
+    if (isAdmin || post.authorId === user?.id) {
       return post.title.includes(searchQuery) || post.content.includes(searchQuery)
     }
     return false
@@ -639,13 +641,15 @@ export default function QnaPage() {
         id: Date.now().toString(),
         title: newTitle,
         content: newContent,
-        authorId: user.id,
-        authorName: user.name || "익명",
+        authorId: user?.id || "",
+        authorName: user?.name || "익명",
         createdAt: new Date().toLocaleDateString("ko-KR"),
         isPrivate: true,
-        answer: undefined,
-        answeredAt: undefined,
+        answer: "",
+        answeredAt: null,
+        attachments: [],
       }
+  
       setPosts([newPost, ...posts])
       setNewTitle("")
       setNewContent("")
@@ -734,7 +738,9 @@ export default function QnaPage() {
   const handleDeleteAnswer = (postId: string) => {
     setPosts(
       posts.map((post) =>
-        post.id === postId ? { ...post, answer: undefined, answeredAt: undefined } : post
+        post.id === postId
+          ? { ...post, answer: "", answeredAt: null }
+          : post
       )
     )
   }
@@ -906,7 +912,7 @@ export default function QnaPage() {
           <QnaPostItem
             key={post.id}
             post={post}
-            currentUserId={user.id}
+            currentUserId={user?.id || ""}
             isAdmin={isAdmin}
             onUpdateQuestion={handleUpdateQuestion}
             onDeleteQuestion={handleDeleteQuestion}

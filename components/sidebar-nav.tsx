@@ -36,8 +36,8 @@ export function SidebarNav() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleLogout = () => {
+    router.replace("/")
     logout()
-    router.push("/")
   }
 
   return (
@@ -139,11 +139,11 @@ export function SidebarNav() {
                   : "bg-violet-500/10 text-violet-600"
               )}
             >
-              {user.name.charAt(0)}
+              {user?.name.charAt(0)}
             </div>
             <div className="flex-1 overflow-hidden">
               <div className="flex items-center gap-1.5">
-                <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
+                <p className="truncate text-sm font-medium text-foreground">{user?.name}</p>
                 {isAdmin ? (
                   <Badge className="gap-0.5 bg-rose-500/10 px-1.5 py-0 text-[10px] text-rose-600 hover:bg-rose-500/10">
                     <Shield className="h-2.5 w-2.5" />
@@ -157,7 +157,7 @@ export function SidebarNav() {
                 )}
               </div>
               <p className="truncate text-xs text-muted-foreground">
-                {isAdmin ? "선생님" : user.grade}
+                {isAdmin ? "선생님" : user?.grade}
               </p>
             </div>
             <button
