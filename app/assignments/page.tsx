@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AppLayout } from "@/components/app-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -32,6 +32,8 @@ import {
   MessageSquare,
   ChevronRight,
   Plus,
+  Trash2,
+  Edit,
 } from "lucide-react"
 import {
   assignments,
@@ -64,7 +66,7 @@ function daysUntilDue(dueDate: string): number {
 
 // ─── Student View ───
 
-function StudentAssignmentCard({ assignment }: { assignment: Assignment }) {
+function StudentAssignmentCard({ assignment, currentUserId }: { assignment: Assignment; currentUserId: string }) {
   const [submitOpen, setSubmitOpen] = useState(false)
   const [fileName, setFileName] = useState("")
   const config = statusConfig(assignment.status)
@@ -72,7 +74,7 @@ function StudentAssignmentCard({ assignment }: { assignment: Assignment }) {
 
   // Find this student's submission/grade for this assignment
   const mySubmission = submissions.find(
-    (s) => s.assignmentId === assignment.id && s.studentId === "user-1"
+    (s) => s.assignmentId === assignment.id && s.studentId === currentUserId
   )
 
   return (
@@ -222,9 +224,9 @@ function StudentAssignmentCard({ assignment }: { assignment: Assignment }) {
   )
 }
 
-function StudentView() {
+function StudentView({ currentUserId }: { currentUserId: string }) {
   const myAssignments = assignments.filter((a) =>
-    a.assignedTo.includes("user-1")
+    a.assignedTo.includes(currentUserId)
   )
   const pending = myAssignments.filter((a) => a.status === "진행중")
   const completed = myAssignments.filter((a) => a.status === "제출완료")
@@ -278,22 +280,22 @@ function StudentView() {
         </TabsList>
         <TabsContent value="all" className="mt-4 space-y-3">
           {myAssignments.map((a) => (
-            <StudentAssignmentCard key={a.id} assignment={a} />
+            <StudentAssignmentCard key={a.id} assignment={a} currentUserId={currentUserId} />
           ))}
         </TabsContent>
         <TabsContent value="pending" className="mt-4 space-y-3">
           {pending.map((a) => (
-            <StudentAssignmentCard key={a.id} assignment={a} />
+            <StudentAssignmentCard key={a.id} assignment={a} currentUserId={currentUserId} />
           ))}
         </TabsContent>
         <TabsContent value="completed" className="mt-4 space-y-3">
           {completed.map((a) => (
-            <StudentAssignmentCard key={a.id} assignment={a} />
+            <StudentAssignmentCard key={a.id} assignment={a} currentUserId={currentUserId} />
           ))}
         </TabsContent>
         <TabsContent value="overdue" className="mt-4 space-y-3">
           {overdue.map((a) => (
-            <StudentAssignmentCard key={a.id} assignment={a} />
+            <StudentAssignmentCard key={a.id} assignment={a} currentUserId={currentUserId} />
           ))}
         </TabsContent>
       </Tabs>
@@ -381,13 +383,207 @@ function GradeDialog({
   )
 }
 
+function CreateAssignmentDialog({
+  open,
+  onOpenChange,
+  initialData,
+  onSubmit,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  initialData?: Assignment | null
+  onSubmit: (data: {
+    title: string
+    description: string
+    subject: string
+    dueDate: string
+    assignedTo: string[]
+  }) => void
+}) {
+  const [selectedStudents, setSelectedStudents] = useState<Set<string>>(
+    initialData ? new Set(initialData.assignedTo) : new Set(students.map(s => s.id))
+  )
+  const [title, setTitle] = useState(initialData?.title || "")
+  const [description, setDescription] = useState(initialData?.description || "")
+  const [subject, setSubject] = useState(initialData?.subject || "")
+  const [dueDate, setDueDate] = useState(initialData?.dueDate || "")
+
+  // initialData가 변경될 때 상태를 업데이트
+  useEffect(() => {
+    if (initialData) {
+      setSelectedStudents(new Set(initialData.assignedTo))
+      setTitle(initialData.title)
+      setDescription(initialData.description)
+      setSubject(initialData.subject)
+      setDueDate(initialData.dueDate)
+    } else {
+      setSelectedStudents(new Set(students.map(s => s.id)))
+      setTitle("")
+      setDescription("")
+      setSubject("")
+      setDueDate("")
+    }
+  }, [initialData])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSubmit({
+      title,
+      description,
+      subject,
+      dueDate,
+      assignedTo: Array.from(selectedStudents),
+    })
+    // 폼 리셋은 onOpenChange(false) 후 다음 렌더링에서 useEffect가 처리
+  }
+
+  const toggleStudent = (studentId: string) => {
+    const updated = new Set(selectedStudents)
+    if (updated.has(studentId)) {
+      updated.delete(studentId)
+    } else {
+      updated.add(studentId)
+    }
+    setSelectedStudents(updated)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {!initialData && (
+        <DialogTrigger asChild>
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            과제 생성
+          </Button>
+        </DialogTrigger>
+      )}
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>
+            {initialData ? "과제 편집" : "새 과제 생성"}
+          </DialogTitle>
+          <DialogDescription>
+            {initialData
+              ? "과제 정보를 수정하세요."
+              : "학생들에게 배포할 새 과제를 생성합니다."}
+          </DialogDescription>
+        </DialogHeader>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="new-title">과제 제목</Label>
+            <Input
+              id="new-title"
+              placeholder="과제 제목을 입력하세요"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="new-desc">과제 설명</Label>
+            <Textarea
+              id="new-desc"
+              placeholder="과제 내용을 상세히 설명하세요"
+              className="min-h-[100px]"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-subject">과목</Label>
+              <Input
+                id="new-subject"
+                placeholder="예: 수학"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-due">마감일</Label>
+              <Input
+                id="new-due"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>대상 학생 지정</Label>
+            <div className="rounded-lg border border-border p-3 max-h-[250px] overflow-y-auto">
+              <div className="space-y-2">
+                {students.map((student) => (
+                  <label
+                    key={student.id}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
+                  >
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                      checked={selectedStudents.has(student.id)}
+                      onChange={() => toggleStudent(student.id)}
+                    />
+                    <span className="text-sm text-foreground">
+                      {student.name}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {student.grade}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {selectedStudents.size}명 선택됨
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label>첨부 파일 (선택)</Label>
+            <div className="rounded-lg border-2 border-dashed border-border bg-muted/30 p-4">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <FileUp className="h-6 w-6 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">
+                  과제 자료 파일을 첨부하세요
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              취소
+            </Button>
+            <Button type="submit">
+              {initialData ? "수정 완료" : "과제 생성"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 function AdminAssignmentDetail({
   assignment,
   onBack,
+  onEdit,
+  onDelete,
 }: {
   assignment: Assignment
   onBack: () => void
+  onEdit?: (assignment: Assignment) => void
+  onDelete?: (id: string) => void
 }) {
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
   const assignmentSubmissions = submissions.filter(
     (s) => s.assignmentId === assignment.id
   )
@@ -399,6 +595,29 @@ function AdminAssignmentDetail({
     (s) => !submittedIds.includes(s.id)
   )
   const graded = assignmentSubmissions.filter((s) => s.grade != null).length
+
+  const handleEdit = (data: {
+    title: string
+    description: string
+    subject: string
+    dueDate: string
+    assignedTo: string[]
+  }) => {
+    if (onEdit) {
+      onEdit({
+        ...assignment,
+        ...data,
+      })
+      setEditOpen(false)
+    }
+  }
+
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(assignment.id)
+      setDeleteOpen(false)
+    }
+  }
 
   return (
     <>
@@ -412,8 +631,8 @@ function AdminAssignmentDetail({
           <ArrowLeft className="h-4 w-4" />
           과제 목록으로 돌아가기
         </button>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold text-foreground">
                 {assignment.title}
@@ -425,6 +644,59 @@ function AdminAssignmentDetail({
             <p className="mt-1 text-sm text-muted-foreground">
               {assignment.description}
             </p>
+          </div>
+          <div className="flex flex-shrink-0 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 bg-transparent"
+              onClick={() => setEditOpen(true)}
+            >
+              <Edit className="h-3.5 w-3.5" />
+              편집
+            </Button>
+            <CreateAssignmentDialog
+              open={editOpen}
+              onOpenChange={setEditOpen}
+              initialData={assignment}
+              onSubmit={handleEdit}
+            />
+            <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 bg-transparent"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  삭제
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-sm">
+                <DialogHeader>
+                  <DialogTitle>과제 삭제</DialogTitle>
+                  <DialogDescription>
+                    "{assignment.title}" 과제를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setDeleteOpen(false)}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleDelete}
+                  >
+                    삭제
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -657,15 +929,58 @@ function AdminView() {
   const [selectedAssignment, setSelectedAssignment] =
     useState<Assignment | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
+  const [assignmentsList, setAssignmentsList] = useState(assignments)
 
-  const pending = assignments.filter((a) => a.status === "진행중")
-  const closed = assignments.filter((a) => a.status !== "진행중")
+  const pending = assignmentsList.filter((a) => a.status === "진행중")
+  const closed = assignmentsList.filter((a) => a.status !== "진행중")
+
+  const handleCreateSubmit = (data: {
+    title: string
+    description: string
+    subject: string
+    dueDate: string
+    assignedTo: string[]
+  }) => {
+    // 새 과제 생성
+    const newAssignment: Assignment = {
+      id: `assign-${Date.now()}`,
+      title: data.title,
+      description: data.description,
+      subject: data.subject,
+      dueDate: data.dueDate,
+      assignedTo: data.assignedTo,
+      status: "진행중",
+    }
+    setAssignmentsList([...assignmentsList, newAssignment])
+    setCreateOpen(false)
+  }
+
+  const handleEditSubmit = (updatedAssignment: Assignment) => {
+    // 실제 API 연동 시 여기서 서버로 전송
+    console.log("과제 수정:", updatedAssignment)
+    setAssignmentsList(
+      assignmentsList.map((a) =>
+        a.id === updatedAssignment.id ? updatedAssignment : a
+      )
+    )
+    setSelectedAssignment(null)
+  }
+
+  const handleDelete = (assignmentId: string) => {
+    // 실제 API 연동 시 여기서 서버로 전송
+    console.log("과제 삭제:", assignmentId)
+    setAssignmentsList(assignmentsList.filter((a) => a.id !== assignmentId))
+    setSelectedAssignment(null)
+  }
 
   if (selectedAssignment) {
+    const currentAssignment = assignmentsList.find((a) => a.id === selectedAssignment.id) || selectedAssignment
     return (
       <AdminAssignmentDetail
-        assignment={selectedAssignment}
+        assignment={currentAssignment}
         onBack={() => setSelectedAssignment(null)}
+        onEdit={handleEditSubmit}
+        onDelete={handleDelete}
       />
     )
   }
@@ -680,101 +995,11 @@ function AdminView() {
             과제를 생성하고, 학생 제출물을 확인하고, 성적을 입력하세요.
           </p>
         </div>
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              과제 생성
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>새 과제 생성</DialogTitle>
-              <DialogDescription>
-                학생들에게 배포할 새 과제를 생성합니다.
-              </DialogDescription>
-            </DialogHeader>
-            <form
-              className="space-y-4"
-              onSubmit={(e) => {
-                e.preventDefault()
-                setCreateOpen(false)
-              }}
-            >
-              <div className="space-y-2">
-                <Label htmlFor="new-title">과제 제목</Label>
-                <Input
-                  id="new-title"
-                  placeholder="과제 제목을 입력하세요"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="new-desc">과제 설명</Label>
-                <Textarea
-                  id="new-desc"
-                  placeholder="과제 내용을 상세히 설명하세요"
-                  className="min-h-[100px]"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="new-subject">과목</Label>
-                  <Input id="new-subject" placeholder="예: 수학" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-due">마감일</Label>
-                  <Input id="new-due" type="date" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>대상 학생 지정</Label>
-                <div className="rounded-lg border border-border p-3">
-                  <div className="space-y-2">
-                    {students.map((student) => (
-                      <label
-                        key={student.id}
-                        className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
-                      >
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                          defaultChecked
-                        />
-                        <span className="text-sm text-foreground">
-                          {student.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {student.grade}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>첨부 파일 (선택)</Label>
-                <div className="rounded-lg border-2 border-dashed border-border bg-muted/30 p-4">
-                  <div className="flex flex-col items-center gap-2 text-center">
-                    <FileUp className="h-6 w-6 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">
-                      과제 자료 파일을 첨부하세요
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setCreateOpen(false)}
-                >
-                  취소
-                </Button>
-                <Button type="submit">과제 생성</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <CreateAssignmentDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onSubmit={handleCreateSubmit}
+        />
       </div>
 
       {/* Stats */}
@@ -782,7 +1007,7 @@ function AdminView() {
         <Card className="border-border">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">
-              {assignments.length}
+              {assignmentsList.length}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">전체 과제</p>
           </CardContent>
@@ -808,14 +1033,14 @@ function AdminView() {
       {/* Assignment Tabs */}
       <Tabs defaultValue="all">
         <TabsList>
-          <TabsTrigger value="all">전체 ({assignments.length})</TabsTrigger>
+          <TabsTrigger value="all">전체 ({assignmentsList.length})</TabsTrigger>
           <TabsTrigger value="pending">진행중 ({pending.length})</TabsTrigger>
           <TabsTrigger value="closed">
             마감/완료 ({closed.length})
           </TabsTrigger>
         </TabsList>
         <TabsContent value="all" className="mt-4 space-y-3">
-          {assignments.map((a) => (
+          {assignmentsList.map((a) => (
             <AdminAssignmentCard
               key={a.id}
               assignment={a}
@@ -849,6 +1074,6 @@ function AdminView() {
 // ─── Main Page ───
 
 export default function AssignmentsPage() {
-  const { isAdmin } = useAuth()
-  return <AppLayout>{isAdmin ? <AdminView /> : <StudentView />}</AppLayout>
+  const { isAdmin, user } = useAuth()
+  return <AppLayout>{isAdmin ? <AdminView /> : <StudentView currentUserId={user.id} />}</AppLayout>
 }

@@ -37,9 +37,9 @@ export interface QnaPost {
   content: string
   createdAt: string
   isPrivate: boolean
-  answer?: string
-  answeredAt?: string
-  attachments?: Array<{
+  answer: string
+  answeredAt: string | null
+  attachments: Array<{
     name: string
     size: number
     type: string
@@ -52,15 +52,17 @@ export const qnaPosts: QnaPost[] = [
     id: "qna-1",
     authorId: "user-1",
     authorName: "김민준",
-    title: "수학 미적분 문제 질문드립니다",
-    content: "교재 145페이지 3번 문제에서 치환적분 과정이 이해가 안됩니다. 어떤 치환을 사용해야 하는지 설명 부탁드립니다.",
+    title: "미적분 치환적분 질문드립니다",
+    content:
+      "교재 145페이지 3번 문제에서 치환적분 과정이 이해되지 않습니다. 어떤 변수를 기준으로 치환해야 하는지 단계별 설명 부탁드립니다.",
     createdAt: "2026-02-08",
     isPrivate: true,
-    answer: "해당 문제는 t = x+1로 치환하면 쉽게 풀 수 있습니다. 자세한 풀이는 다음 수업 시간에 설명드리겠습니다.",
+    answer:
+      "해당 문제는 t = x+1로 치환하면 계산이 단순해집니다. 치환 후 적분 구간도 함께 변환해 주세요.",
     answeredAt: "2026-02-09",
     attachments: [
       {
-        name: "problem_screenshot.png",
+        name: "calculus_problem.png",
         size: 245000,
         type: "image/png",
         url: "https://picsum.photos/400/300",
@@ -71,51 +73,64 @@ export const qnaPosts: QnaPost[] = [
     id: "qna-2",
     authorId: "user-2",
     authorName: "이서연",
-    title: "영어 에세이 첨삭 요청합니다",
-    content: "이번 주 과제로 제출한 에세이 첨삭 부탁드립니다. 특히 결론 부분이 약한 것 같습니다.",
+    title: "수열 일반항 구하는 방법 질문",
+    content:
+      "등차수열과 등비수열이 함께 나오는 문제에서 일반항을 어떻게 구해야 하는지 헷갈립니다. 접근 방법을 알려주세요.",
     createdAt: "2026-02-07",
     isPrivate: true,
+    answer: "",
+    answeredAt: null,
+    attachments: [],
+  },
+  {
+    id: "qna-3",
+    authorId: "user-3",
+    authorName: "정하준",
+    title: "확률과 통계 경우의 수 문제 질문",
+    content:
+      "경우의 수 문제에서 중복조합과 조합을 구분하는 기준이 잘 이해되지 않습니다. 예시와 함께 설명 부탁드립니다.",
+    createdAt: "2026-02-06",
+    isPrivate: true,
+    answer:
+      "같은 원소를 여러 번 선택할 수 있으면 중복조합, 한 번만 선택 가능하면 조합을 사용합니다. 교재 3단원 예제를 참고하세요.",
+    answeredAt: "2026-02-06",
+    attachments: [],
+  },
+  {
+    id: "qna-4",
+    authorId: "user-4",
+    authorName: "최은서",
+    title: "기하 벡터 내적 계산 확인 요청",
+    content:
+      "벡터 내적 계산 과정에서 부호 처리가 헷갈립니다. 풀이 과정이 맞는지 확인 부탁드립니다.",
+    createdAt: "2026-02-05",
+    isPrivate: true,
+    answer: "",
+    answeredAt: null,
     attachments: [
       {
-        name: "essay_draft.pdf",
-        size: 156000,
+        name: "vector_solution.pdf",
+        size: 182000,
         type: "application/pdf",
         url: "#",
       },
     ],
   },
   {
-    id: "qna-3",
-    authorId: "user-3",
-    authorName: "정하준",
-    title: "과학 실험 보고서 양식 문의",
-    content: "실험 보고서 양식을 어디서 다운로드할 수 있나요?",
-    createdAt: "2026-02-06",
-    isPrivate: true,
-    answer: "복습 영상 게시판의 과학 카테고리 자료실에서 다운로드 가능합니다.",
-    answeredAt: "2026-02-06",
-  },
-  {
-    id: "qna-4",
-    authorId: "user-4",
-    authorName: "최은서",
-    title: "국어 모의고사 범위 확인",
-    content: "다음 주 국어 모의고사 범위가 어디까지인지 확인 부탁드립니다.",
-    createdAt: "2026-02-05",
-    isPrivate: true,
-  },
-  {
     id: "qna-5",
     authorId: "user-5",
     authorName: "박지호",
-    title: "수업 시간 변경 가능한가요?",
-    content: "월요일 수업을 화요일로 변경할 수 있을까요? 학교 일정이 겹칩니다.",
+    title: "모의고사 수학 오답노트 작성법 문의",
+    content:
+      "2월 모의고사에서 틀린 수학 문제를 어떻게 정리하면 좋을까요? 오답노트 작성 방법이 궁금합니다.",
     createdAt: "2026-02-04",
     isPrivate: true,
-    answer: "네, 화요일 같은 시간대로 변경 가능합니다. 다음 주부터 적용하겠습니다.",
+    answer:
+      "틀린 문제를 개념 오류, 계산 실수, 시간 부족으로 구분해 정리하세요. 같은 유형 문제를 2~3개 추가로 풀어보는 것이 좋습니다.",
     answeredAt: "2026-02-05",
+    attachments: [],
   },
-]
+];
 
 // Lecture Video Board
 export interface LectureCategory {
@@ -125,7 +140,7 @@ export interface LectureCategory {
   instructor: string
   thumbnail: string
   courseCount: number
-  assignedTo?: string[]
+  assignedTo: string[]
 }
 
 export interface Course {
@@ -158,38 +173,50 @@ export interface Resource {
 export const lectureCategories: LectureCategory[] = [
   {
     id: "cat-1",
-    name: "수학",
-    description: "미적분, 확률과 통계, 기하 등",
+    name: "미적분",
+    description: "극한, 미분, 적분 및 응용 문제",
     instructor: "서이연",
     thumbnail: "",
-    courseCount: 3,
+    courseCount: 4,
     assignedTo: ["user-1", "user-2", "user-3"],
   },
   {
     id: "cat-2",
-    name: "영어",
-    description: "독해, 문법, 듣기 등",
-    instructor: "이선생",
+    name: "수열",
+    description: "등차·등비수열, 점화식, 귀납법",
+    instructor: "서이연",
     thumbnail: "",
-    courseCount: 2,
+    courseCount: 3,
+    assignedTo: ["user-1", "user-4"],
   },
   {
     id: "cat-3",
-    name: "국어",
-    description: "문학, 비문학, 화법과 작문 등",
-    instructor: "최선생",
+    name: "확률과 통계",
+    description: "확률, 경우의 수, 통계 추론",
+    instructor: "서이연",
     thumbnail: "",
-    courseCount: 2,
+    courseCount: 3,
+    assignedTo: [],
   },
   {
     id: "cat-4",
-    name: "과학",
-    description: "물리, 화학, 생명과학 등",
-    instructor: "김선생",
+    name: "기하와 벡터",
+    description: "평면벡터, 공간도형, 기하적 해석",
+    instructor: "서이연",
     thumbnail: "",
-    courseCount: 3,
+    courseCount: 2,
+    assignedTo: ["user-1", "user-3"],
   },
-]
+  {
+    id: "cat-5",
+    name: "모의고사 분석",
+    description: "기출 분석, 오답 정리, 유형별 전략",
+    instructor: "서이연",
+    thumbnail: "",
+    courseCount: 2,
+    assignedTo: [],
+  },
+];
 
 export const courses: Course[] = [
   { id: "course-1", categoryId: "cat-1", name: "미적분 기초반", lessonCount: 3 },
@@ -320,24 +347,6 @@ export const instructors = [
     ],
     image: "",
   },
-  {
-    name: "이선생",
-    subject: "영어",
-    description: "연세대학교 영어영문학과 출신, TOEFL 만점 강사",
-    image: "",
-  },
-  {
-    name: "최선생",
-    subject: "국어",
-    description: "고려대학교 국어국문학과 출신, EBS 출제위원 경력",
-    image: "",
-  },
-  {
-    name: "김선생",
-    subject: "과학",
-    description: "KAIST 물리학과 출신, 과학 올림피아드 지도 경력",
-    image: "",
-  },
 ]
 
 // Students list (for admin view)
@@ -387,9 +396,9 @@ export const submissions: Submission[] = [
     studentId: "user-2",
     studentName: "이서연",
     submittedAt: "2026-02-13",
-    fileName: "미적분_연습문제_이서연.pdf",
+    fileName: "미적분_연습문제풀이_이서연.pdf",
     grade: 92,
-    feedback: "풀이 과정이 매우 깔끔합니다. 15번 문제의 치환 과정을 조금 더 보완하면 좋겠습니다.",
+    feedback: "풀이 과정이 매우 논리적입니다. 15번 문제의 치환 과정 설명을 조금 더 구체적으로 작성하면 좋겠습니다.",
   },
   {
     id: "sub-2",
@@ -397,7 +406,7 @@ export const submissions: Submission[] = [
     studentId: "user-3",
     studentName: "정하준",
     submittedAt: "2026-02-14",
-    fileName: "미적분_풀이_정하준.pdf",
+    fileName: "미적분_연습문제풀이_정하준.pdf",
     grade: null,
     feedback: undefined,
   },
@@ -407,9 +416,9 @@ export const submissions: Submission[] = [
     studentId: "user-4",
     studentName: "최은서",
     submittedAt: "2026-02-11",
-    fileName: "영어에세이_최은서.docx",
+    fileName: "수열_심화문제풀이_최은서.pdf",
     grade: 88,
-    feedback: "논리적 전개가 좋습니다. 결론 부분을 좀 더 강화해보세요.",
+    feedback: "풀이 접근 방식이 좋습니다. 일반항 도출 과정을 조금 더 정리해보세요.",
   },
   {
     id: "sub-4",
@@ -417,9 +426,9 @@ export const submissions: Submission[] = [
     studentId: "user-2",
     studentName: "이서연",
     submittedAt: "2026-02-09",
-    fileName: "비문학분석_이서연.hwp",
+    fileName: "확률과통계_기출분석_이서연.pdf",
     grade: 95,
-    feedback: "구조 분석이 정확합니다. 모범 답안 수준입니다.",
+    feedback: "문제 유형 분석이 정확합니다. 계산 실수 없이 깔끔한 풀이입니다.",
   },
   {
     id: "sub-5",
@@ -427,9 +436,9 @@ export const submissions: Submission[] = [
     studentId: "user-1",
     studentName: "김민준",
     submittedAt: "2026-02-04",
-    fileName: "자유낙하실험_김민준.pdf",
+    fileName: "벡터_내적과외적_김민준.pdf",
     grade: 90,
-    feedback: "실험 데이터 분석이 정확합니다.",
+    feedback: "벡터 개념 이해도가 높습니다. 풀이 설명을 조금 더 상세히 작성하면 좋겠습니다.",
   },
   {
     id: "sub-6",
@@ -437,7 +446,7 @@ export const submissions: Submission[] = [
     studentId: "user-1",
     studentName: "김민준",
     submittedAt: "2026-02-09",
-    fileName: "비문학분석_김민준.hwp",
+    fileName: "확률과통계_기출분석_김민준.pdf",
     grade: null,
     feedback: undefined,
   },
@@ -447,17 +456,17 @@ export const submissions: Submission[] = [
     studentId: "user-1",
     studentName: "김민준",
     submittedAt: "2026-02-11",
-    fileName: "영어에세이_김민준.docx",
+    fileName: "수열_심화문제풀이_김민준.pdf",
     grade: 85,
-    feedback: "어휘력은 우수하나 문법적 오류가 일부 있습니다.",
+    feedback: "풀이 아이디어는 좋습니다. 수식 정리를 조금 더 명확히 해보세요.",
   },
-]
+];
 
 export const assignments: Assignment[] = [
   {
     id: "assign-1",
     title: "미적분 연습문제 풀이",
-    description: "교재 Chapter 5 연습문제 1~20번을 풀고 풀이과정을 작성하여 제출하세요.",
+    description: "교재 Chapter 5 미분 단원 연습문제 1~20번을 풀이과정과 함께 작성하여 제출하세요.",
     subject: "수학",
     dueDate: "2026-02-15",
     assignedTo: ["user-1", "user-2", "user-3"],
@@ -465,27 +474,27 @@ export const assignments: Assignment[] = [
   },
   {
     id: "assign-2",
-    title: "영어 에세이 작성",
-    description: "'Climate Change and Our Future'라는 주제로 500단어 이상의 에세이를 작성하세요.",
-    subject: "영어",
+    title: "수열 심화 문제 풀이",
+    description: "등차·등비수열 및 점화식 관련 심화문제 10문제를 풀이과정과 함께 제출하세요.",
+    subject: "수학",
     dueDate: "2026-02-12",
     assignedTo: ["user-1", "user-4"],
     status: "진행중",
   },
   {
     id: "assign-3",
-    title: "국어 비문학 지문 분석",
-    description: "제공된 비문학 지문 3개를 읽고 구조 분석표를 작성하세요.",
-    subject: "국어",
+    title: "확률과 통계 기출 분석",
+    description: "최근 3개년 모의고사 확률과 통계 문제를 유형별로 분석하고 풀이를 정리하세요.",
+    subject: "수학",
     dueDate: "2026-02-10",
     assignedTo: ["user-1", "user-2"],
     status: "진행중",
   },
   {
     id: "assign-4",
-    title: "물리 실험 보고서",
-    description: "자유낙하 실험 보고서를 양식에 맞춰 작성하세요.",
-    subject: "과학",
+    title: "벡터 단원 정리 과제",
+    description: "벡터의 내적·외적 개념을 정리하고 대표 문제 5개를 풀이하여 제출하세요.",
+    subject: "수학",
     dueDate: "2026-02-05",
     assignedTo: ["user-1"],
     status: "제출완료",
@@ -493,11 +502,11 @@ export const assignments: Assignment[] = [
   },
   {
     id: "assign-5",
-    title: "수학 모의고사 오답노트",
-    description: "2월 모의고사 틀린 문제의 오답노트를 작성하세요.",
+    title: "2월 모의고사 오답노트",
+    description: "2월 모의고사 수학 영역 오답 문제를 분석하고 풀이 과정을 정리하세요.",
     subject: "수학",
     dueDate: "2026-02-03",
     assignedTo: ["user-1", "user-3"],
     status: "마감",
   },
-]
+];
