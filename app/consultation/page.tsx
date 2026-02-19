@@ -361,6 +361,8 @@ export default function ConsultationPage() {
   const [newContent, setNewContent] = useState("")
   const [consultationType, setConsultationType] = useState("")
 
+  if (!user) return null
+
   // LocalStorage에 consultations 저장
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -388,8 +390,8 @@ export default function ConsultationPage() {
         id: Date.now().toString(),
         title: newTitle,
         content: newContent,
-        authorId: user.id,
-        authorName: user.name || "익명",
+        authorId: user?.id || "",
+        authorName: user?.name || "익명",
         createdAt: new Date().toLocaleDateString("ko-KR"),
         status: "접수완료",
         answer: undefined,
@@ -571,7 +573,7 @@ export default function ConsultationPage() {
           <ConsultationItem
             key={item.id}
             item={item}
-            currentUserId={user.id}
+            currentUserId={user?.id || ""}
             isAdmin={isAdmin}
             onUpdateConsultation={handleUpdateConsultation}
             onDeleteConsultation={handleDeleteConsultation}

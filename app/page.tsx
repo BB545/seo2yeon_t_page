@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/lib/auth-context"
+import Image from "next/image"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -41,15 +42,20 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-white px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
-            <BookOpen className="h-7 w-7 text-primary-foreground" />
+          <div className="flex items-center justify-center pt-10">
+            <Image
+              src="/images/logo/logo_s2y.png"
+              alt="Logo"
+              width={150}
+              height={30}
+            />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">EduManager</h1>
-          <p className="text-sm text-muted-foreground">학생 관리 시스템</p>
+          {/* <h1 className="text-2xl font-bold text-foreground">서이연 수학</h1>
+          <p className="text-sm text-muted-foreground">학생 관리 사이트</p> */}
         </div>
 
         <Card className="border-border shadow-sm">
@@ -94,7 +100,7 @@ export default function LoginPage() {
             </form>
 
             {/* Quick login section */}
-            <div className="mt-6">
+            {/* <div className="mt-6">
               <div className="relative mb-4">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-border" />
@@ -131,11 +137,11 @@ export default function LoginPage() {
                   </div>
                 </button>
               </div>
-            </div>
+            </div> */}
 
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">계정이 없으신가요?</span>{" "}
-              <Link href="/signup" className="font-medium text-primary hover:underline">
+              <Link href="/signup" className="font-medium text-violet-600 hover:underline">
                 회원가입
               </Link>
             </div>

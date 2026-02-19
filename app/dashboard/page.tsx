@@ -510,13 +510,15 @@ function AdminDashboard() {
 export default function DashboardPage() {
   const { user, isAdmin } = useAuth()
 
+  if (!user) return null
+
   return (
     <AppLayout>
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-foreground">
-            안녕하세요, {user.name}님
+            안녕하세요, {user?.name}님
           </h1>
           {isAdmin ? (
             <Badge className="gap-1 bg-rose-500/10 text-rose-600 hover:bg-rose-500/10">
