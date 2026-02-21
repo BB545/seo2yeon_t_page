@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { AppLayout } from "@/components/app-layout"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -17,10 +17,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Lock, ChevronDown, ChevronUp, EyeOff, MessageSquare, Trash2, Pencil } from "lucide-react"
-import { consultations as initialConsultations, instructors, type Consultation } from "@/lib/mock-data"
+import { ArrowLeft, Lock, ChevronDown, ChevronUp, EyeOff, MessageSquare, Trash2, Pencil } from "lucide-react"
+import { consultations as initialConsultations, type Consultation } from "@/lib/mock-data"
 import { useAuth } from "@/lib/auth-context"
-import Image from "next/image"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 function statusColor(status: Consultation["status"]) {
   switch (status) {
@@ -117,7 +118,6 @@ function ConsultationItem({
                   <p className="text-sm leading-relaxed text-foreground">{item.content}</p>
                 </div>
 
-                {/* Consultation edit/delete buttons for owner */}
                 {isOwner && (
                   <div className="mt-2 flex gap-2 justify-end">
                     <Dialog open={editConsultationOpen} onOpenChange={setEditConsultationOpen}>
@@ -202,7 +202,6 @@ function ConsultationItem({
                         </Badge>
                         <span className="text-xs text-muted-foreground">{item.answeredAt}</span>
                       </div>
-                      {/* Answer edit/delete buttons for admin */}
                       {isAdmin && (
                         <div className="flex gap-1">
                           <Dialog open={editAnswerOpen} onOpenChange={setEditAnswerOpen}>
@@ -272,7 +271,6 @@ function ConsultationItem({
                   </div>
                 )}
 
-                {/* Admin answer button */}
                 {isAdmin && !item.answer && (
                   <div className="mt-3 flex justify-end">
                     <Dialog open={answerOpen} onOpenChange={setAnswerOpen}>
@@ -350,22 +348,17 @@ function ConsultationItem({
   )
 }
 
-export default function ConsultationPage() {
+export default function PendingConsultationPage() {
+  const router = useRouter()
   const { user, isAdmin } = useAuth()
-  const [dialogOpen, setDialogOpen] = useState(false)
   const [consultations, setConsultations] = useState<Consultation[]>(initialConsultations)
-  const [newTitle, setNewTitle] = useState("")
-  const [newContent, setNewContent] = useState("")
-  const [consultationType, setConsultationType] = useState("")
 
-  // LocalStorage에 consultations 저장
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("consultations", JSON.stringify(consultations))
     }
   }, [consultations])
 
-  // LocalStorage에서 consultations 로드
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedConsultations = localStorage.getItem("consultations")
@@ -379,28 +372,7 @@ export default function ConsultationPage() {
     }
   }, [])
 
-  if (!user) return null
-
-  const handleAddConsultation = () => {
-    if (newTitle.trim() && newContent.trim()) {
-      const newConsultation: Consultation = {
-        id: Date.now().toString(),
-        title: newTitle,
-        content: newContent,
-        authorId: user?.id || "",
-        authorName: user?.name || "익명",
-        createdAt: new Date().toLocaleDateString("ko-KR"),
-        status: "대기중",
-        answer: undefined,
-        answeredAt: undefined,
-      }
-      setConsultations([newConsultation, ...consultations])
-      setNewTitle("")
-      setNewContent("")
-      setConsultationType("")
-      setDialogOpen(false)
-    }
-  }
+  const pendingConsultations = consultations.filter((c) => c.status === "대기중")
 
   const handleUpdateConsultation = (id: string, title: string, content: string) => {
     setConsultations(
@@ -432,152 +404,43 @@ export default function ConsultationPage() {
     )
   }
 
+  if (!user) return null
+
   return (
     <AppLayout>
-      {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">학습 상담</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {isAdmin
-              ? "학생들의 상담 요청을 확인하고 답변하세요."
-              : "학습 방향, 진로 등 고민에 대해 자유롭게 남겨주세요."}
-          </p>
-        </div>
-        {!isAdmin && (
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                상담 신청
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>학습 상담 신청</DialogTitle>
-                <DialogDescription>
-                  상담 내용을 작성하세요. 모든 상담은 비공개로 진행됩니다.
-                </DialogDescription>
-              </DialogHeader>
-              <form
-                className="space-y-4"
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  handleAddConsultation()
-                }}
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="consult-type">상담 유형</Label>
-                  <Select value={consultationType} onValueChange={setConsultationType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="상담 유형을 선택하세요" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="study">학습 방법 상담</SelectItem>
-                      <SelectItem value="career">진로 상담</SelectItem>
-                      <SelectItem value="schedule">스케줄 조정</SelectItem>
-                      <SelectItem value="other">기타</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="consult-title">제목</Label>
-                  <Input
-                    id="consult-title"
-                    placeholder="상담 제목을 입력하세요"
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="consult-content">상담 내용</Label>
-                  <Textarea
-                    id="consult-content"
-                    placeholder="상담 내용을 자세히 작성해주세요"
-                    value={newContent}
-                    onChange={(e) => setNewContent(e.target.value)}
-                    className="min-h-[150px]"
-                  />
-                </div>
-                <div className="flex items-center gap-2 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-                  <Lock className="h-4 w-4 flex-shrink-0" />
-                  <span>모든 상담 내용은 비공개로 처리되며, 작성자와 관리자만 확인할 수 있습니다.</span>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                    취소
-                  </Button>
-                  <Button type="submit">신청</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
+      <div className="mb-6">
+      <Button
+          onClick={() => router.back()}
+          size="sm"
+          className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+          뒤로가기
+        </Button>
+        <h1 className="text-2xl font-bold text-foreground mt-4">미답변 상담</h1>
       </div>
 
-      {/* Instructor Section */}
-      <div className="mb-8">
-        {instructors.slice(0, 1).map((instructor) => (
-          <Card key={instructor.name} className="border-border">
-            <CardContent className="px-4 py-6">
-              <div className="flex flex-row gap-16 justify-center items-start">
-                {/* Image & Name - Left side on web */}
-                <div className="text-center lg:w-48 lg:flex-shrink-0">
-                  <Image
-                    src="/images/info/seo2_img.jpg"
-                    alt="imfo_img"
-                    width={80}
-                    height={80}
-                    className="mx-auto mb-3 flex h-20 w-20 items-center justify-center text-sidebar-primary rounded-full object-cover border border-rose-200"
-                  />
-                  <h3 className="font-semibold text-foreground">{instructor.name} 선생님</h3>
-                </div>
-
-                {/* Description - Right side on web */}
-                <div className="relative py-6 flex flex-col lg:flex-row gap-4 lg:gap-16 before:content-['“'] before:absolute before:-left-8 before:top-0 before:text-5xl before:text-rose-200 before:font-serif after:content-['”'] after:absolute after:-right-8 after:-bottom-6 after:text-5xl after:text-rose-200 after:font-serif">
-                  <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
-                    {instructor.description}
-                  </p>
-                  <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 text-left">
-                    {instructor.description2?.map((item, index) => (
-                      <li key={index}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+      <div className="space-y-3">
+        {pendingConsultations.length > 0 ? (
+          pendingConsultations.map((item) => (
+            <ConsultationItem
+              key={item.id}
+              item={item}
+              currentUserId={user?.id || ""}
+              isAdmin={isAdmin}
+              onUpdateConsultation={handleUpdateConsultation}
+              onDeleteConsultation={handleDeleteConsultation}
+              onUpdateAnswer={handleUpdateAnswer}
+              onDeleteAnswer={handleDeleteAnswer}
+            />
+          ))
+        ) : (
+          <Card className="border-border">
+            <CardContent className="flex items-center justify-center py-12">
+              <p className="text-muted-foreground">미답변 상담이 없습니다.</p>
             </CardContent>
           </Card>
-        ))}
-      </div>
-
-      {/* Info banner */}
-      <div className="mb-6 flex items-center gap-3 rounded-xl border border-purple-500/20 bg-purple-500/5 px-4 py-3">
-        <Lock className="h-5 w-5 flex-shrink-0 text-purple-400" />
-        <p className="text-sm text-foreground">
-          {isAdmin ? (
-            <>관리자는 모든 상담 내용을 확인하고 답변할 수 있습니다.</>
-          ) : (
-            <>
-              모든 상담 글은 <strong>전체 비공개</strong>로 처리됩니다. 해당 게시글은 작성자와 선생님만 확인할 수 있습니다.
-            </>
-          )}
-        </p>
-      </div>
-
-      {/* Consultation list */}
-      <div className="space-y-3">
-        {consultations.map((item) => (
-          <ConsultationItem
-            key={item.id}
-            item={item}
-            currentUserId={user?.id || ""}
-            isAdmin={isAdmin}
-            onUpdateConsultation={handleUpdateConsultation}
-            onDeleteConsultation={handleDeleteConsultation}
-            onUpdateAnswer={handleUpdateAnswer}
-            onDeleteAnswer={handleDeleteAnswer}
-          />
-        ))}
+        )}
       </div>
     </AppLayout>
   )

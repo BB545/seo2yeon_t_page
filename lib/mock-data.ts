@@ -291,7 +291,7 @@ export interface Consultation {
   title: string
   content: string
   createdAt: string
-  status: "접수완료" | "상담진행중" | "답변완료"
+  status: "대기중" | "답변완료"
   answer?: string
   answeredAt?: string
 }
@@ -315,7 +315,7 @@ export const consultations: Consultation[] = [
     title: "진로 관련 상담 신청",
     content: "문과에서 이과로 교차지원을 고려하고 있는데, 가능한 학과와 준비 방법이 궁금합니다.",
     createdAt: "2026-02-07",
-    status: "상담진행중",
+    status: "대기중",
   },
   {
     id: "consult-3",
@@ -324,7 +324,7 @@ export const consultations: Consultation[] = [
     title: "학습 스케줄 조정 상담",
     content: "학교 내신과 수능 준비를 병행하려면 어떻게 스케줄을 짜면 좋을까요?",
     createdAt: "2026-02-05",
-    status: "접수완료",
+    status: "대기중",
   },
 ]
 

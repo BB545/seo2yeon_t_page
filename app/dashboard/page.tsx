@@ -374,7 +374,7 @@ function AdminDashboard() {
             color="border-emerald-500 text-emerald-500"
           />
         </Link>
-        <Link href="/qna">
+        <Link href="/pending-qna">
           <StatCard
             icon={MessageSquareMore}
             label="미답변 질문"
@@ -382,10 +382,10 @@ function AdminDashboard() {
             color="border-amber-500 text-amber-500"
           />
         </Link>
-        <Link href="/consultation">
+        <Link href="/pending-consultation">
           <StatCard
             icon={GraduationCap}
-            label="진행중 상담"
+            label="미답변 상담"
             value={`${pendingConsultations}건`}
             color="border-rose-500 text-rose-500"
           />
@@ -449,7 +449,7 @@ function AdminDashboard() {
         <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base font-semibold">미답변 질문</CardTitle>
-            <Link href="/qna">
+            <Link href="/pending-qna">
               <Button
                 variant="ghost"
                 size="sm"
@@ -488,9 +488,9 @@ function AdminDashboard() {
         <Card className="border-border lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base font-semibold">
-              진행중인 상담
+              미답변 상담
             </CardTitle>
-            <Link href="/consultation">
+            <Link href="/pending-consultation">
               <Button
                 variant="ghost"
                 size="sm"
@@ -518,9 +518,9 @@ function AdminDashboard() {
                   </div>
                   <Badge
                     className={`ml-3 flex-shrink-0 ${
-                      item.status === "접수완료"
-                        ? "bg-blue-500/10 text-blue-600 hover:bg-blue-500/10"
-                        : "bg-amber-500/10 text-amber-600 hover:bg-amber-500/10"
+                      item.status === "대기중"
+                        ? "bg-amber-500/10 text-amber-600 hover:bg-amber-500/10"
+                        : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/10"
                     }`}
                   >
                     {item.status}
