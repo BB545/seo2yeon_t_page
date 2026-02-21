@@ -623,17 +623,17 @@ function AdminAssignmentDetail({
     <>
       {/* Back button and header */}
       <div className="mb-6">
-        <button
-          type="button"
+        <Button
+          size="sm"
           onClick={onBack}
-          className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
           과제 목록으로 돌아가기
-        </button>
+        </Button>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 mt-4">
               <h1 className="text-2xl font-bold text-foreground">
                 {assignment.title}
               </h1>
@@ -645,7 +645,7 @@ function AdminAssignmentDetail({
               {assignment.description}
             </p>
           </div>
-          <div className="flex flex-shrink-0 gap-2">
+          <div className="flex flex-shrink-0 gap-2 mt-4">
             <Button
               variant="outline"
               size="sm"
@@ -783,9 +783,9 @@ function AdminAssignmentDetail({
                   </div>
                 </div>
                 {sub.feedback && (
-                  <div className="mt-3 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                  <div className="mt-3 rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2">
                     <div className="flex items-start gap-2">
-                      <MessageSquare className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-primary" />
+                      <MessageSquare className="mt-1 h-3.5 w-3.5 flex-shrink-0 text-purple-400" />
                       <p className="text-sm text-muted-foreground">
                         {sub.feedback}
                       </p>

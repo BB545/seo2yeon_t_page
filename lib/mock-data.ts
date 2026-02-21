@@ -219,16 +219,16 @@ export const lectureCategories: LectureCategory[] = [
 ];
 
 export const courses: Course[] = [
-  { id: "course-1", categoryId: "cat-1", name: "미적분 기초반", lessonCount: 3 },
-  { id: "course-2", categoryId: "cat-1", name: "확률과 통계", lessonCount: 0 },
-  { id: "course-3", categoryId: "cat-1", name: "기하 심화반", lessonCount: 0 },
-  { id: "course-4", categoryId: "cat-2", name: "수능 독해 마스터", lessonCount: 0 },
-  { id: "course-5", categoryId: "cat-2", name: "영문법 완성", lessonCount: 0 },
-  { id: "course-6", categoryId: "cat-3", name: "문학 개념 정리", lessonCount: 0 },
-  { id: "course-7", categoryId: "cat-3", name: "비문학 독해 전략", lessonCount: 0 },
-  { id: "course-8", categoryId: "cat-4", name: "물리학 I", lessonCount: 0 },
-  { id: "course-9", categoryId: "cat-4", name: "화학 I", lessonCount: 0 },
-  { id: "course-10", categoryId: "cat-4", name: "생명과학 I", lessonCount: 0 },
+  { id: "course-1", categoryId: "cat-1", name: "미적분 기본 개념반", lessonCount: 3 },
+  { id: "course-2", categoryId: "cat-1", name: "미적분 응용 문제반", lessonCount: 0 },
+  { id: "course-3", categoryId: "cat-1", name: "미적분 심화 풀이반", lessonCount: 0 },
+  { id: "course-4", categoryId: "cat-2", name: "수열 개념 완성반", lessonCount: 0 },
+  { id: "course-5", categoryId: "cat-2", name: "수열 문제 풀이 전략반", lessonCount: 0 },
+  { id: "course-6", categoryId: "cat-3", name: "확률과 통계 개념 완성", lessonCount: 0 },
+  { id: "course-7", categoryId: "cat-3", name: "확률과 통계 문제 풀이반", lessonCount: 0 },
+  { id: "course-8", categoryId: "cat-4", name: "기하 개념 완성반", lessonCount: 0 },
+  { id: "course-9", categoryId: "cat-4", name: "벡터 심화 풀이반", lessonCount: 0 },
+  { id: "course-10", categoryId: "cat-4", name: "기하와 벡터 실전 문제반", lessonCount: 0 },
 ]
 
 export const lessons: Lesson[] = [
