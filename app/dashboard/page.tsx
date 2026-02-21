@@ -226,7 +226,28 @@ function StudentListModal({
   isOpen: boolean
   onClose: () => void
 }) {
-  const studentsByGrade = students.reduce(
+  const [selectedSchool, setSelectedSchool] = useState<string>("전체")
+
+  const studentsBySchool = students.reduce(
+    (acc, student) => {
+      const school = student.school || "미지정"
+      if (!acc[school]) {
+        acc[school] = []
+      }
+      acc[school].push(student)
+      return acc
+    },
+    {} as Record<string, Student[]>
+  )
+
+  const allSchools = ["전체", ...Object.keys(studentsBySchool).sort()]
+
+  const filteredStudents =
+    selectedSchool === "전체"
+      ? students
+      : studentsBySchool[selectedSchool] || []
+
+  const filteredStudentsByGrade = filteredStudents.reduce(
     (acc, student) => {
       const grade = student.grade || "미지정"
       if (!acc[grade]) {
@@ -238,7 +259,7 @@ function StudentListModal({
     {} as Record<string, Student[]>
   )
 
-  const sortedGrades = Object.keys(studentsByGrade).sort((a, b) => {
+  const sortedGrades = Object.keys(filteredStudentsByGrade).sort((a, b) => {
     if (a === "미지정") return 1
     if (b === "미지정") return -1
     return a.localeCompare(b)
@@ -248,8 +269,8 @@ function StudentListModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-        <CardHeader className="flex flex-row items-center justify-between border-b">
+      <Card className="w-[600px] h-[600px] overflow-hidden flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
           <CardTitle>등록 학생 목록</CardTitle>
           <button
             onClick={onClose}
@@ -258,30 +279,66 @@ function StudentListModal({
             <X className="h-5 w-5" />
           </button>
         </CardHeader>
+        
+        <div className="border-b px-6 py-3 bg-muted/20">
+          <p className="text-xs font-medium text-muted-foreground mb-2">학교 선택</p>
+          <div className="flex flex-wrap gap-2">
+            {allSchools.map((school) => (
+              <button
+                key={school}
+                onClick={() => setSelectedSchool(school)}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors font-medium ${
+                  selectedSchool === school
+                    ? "bg-violet-500 text-white"
+                    : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
+                }`}
+              >
+                {school}
+                <span className="ml-1 text-xs">
+                  ({school === "전체"
+                    ? students.length
+                    : studentsBySchool[school]?.length || 0})
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <CardContent className="flex-1 overflow-y-auto p-0">
-          {sortedGrades.map((grade) => (
-            <div key={grade} className="border-b last:border-b-0">
-              <div className="sticky top-0 bg-muted/50 px-6 py-3 font-semibold text-sm">
-                {grade}
-              </div>
-              <div className="divide-y">
-                {studentsByGrade[grade].map((student) => (
-                  <div
-                    key={student.id}
-                    className="flex items-center justify-between px-6 py-3 hover:bg-muted/30 transition-colors"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">{student.name}</p>
-                      <p className="text-xs text-muted-foreground">ID: {student.id}</p>
+          {sortedGrades.length > 0 ? (
+            sortedGrades.map((grade) => (
+              <div key={grade} className="border-b last:border-b-0">
+                <div className="sticky top-0 bg-muted/50 px-6 py-3 font-semibold text-sm flex items-center justify-between">
+                  <span>{grade}</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {filteredStudentsByGrade[grade].length}명
+                  </span>
+                </div>
+                <div className="divide-y">
+                  {filteredStudentsByGrade[grade].map((student) => (
+                    <div
+                      key={student.id}
+                      className="flex items-center justify-between px-6 py-3 hover:bg-muted/30 transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium text-foreground">{student.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          ID: {student.id} • {student.school}
+                        </p>
+                      </div>
+                      <Badge className="text-xs bg-violet-200 text-secondary-foreground hover:bg-violet-200 border-transparent">
+                        {student.grade}
+                      </Badge>
                     </div>
-                    <Badge className="text-xs bg-violet-200 text-secondary-foreground hover:bg-violet-200 border-transparent">
-                      {student.grade}
-                    </Badge>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="flex items-center justify-center h-40 text-muted-foreground">
+              해당 학교의 등록된 학생이 없습니다.
             </div>
-          ))}
+          )}
         </CardContent>
       </Card>
     </div>
