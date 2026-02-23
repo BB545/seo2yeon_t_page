@@ -28,7 +28,7 @@ interface CategoryFormData {
 
 export default function CategoryPage({ params }: { params: Promise<{ categoryId: string }> }) {
   const { categoryId } = use(params)
-  const { isAdmin } = useAuth()
+  const { isAdmin, isAssistantAdmin, isStaff } = useAuth()
   const [editOpen, setEditOpen] = useState(false)
   const [addCourseOpen, setAddCourseOpen] = useState(false)
   const [categoryData, setCategoryData] = useState<CategoryFormData | null>(null)
@@ -140,7 +140,7 @@ export default function CategoryPage({ params }: { params: Promise<{ categoryId:
             {category?.instructor}
           </Badge>
         </div>
-        {isAdmin && (
+        {(isAdmin || isAssistantAdmin) && (
           <div className="flex gap-2">
             {/* 카테고리 편집 */}
             <Dialog open={editOpen} onOpenChange={setEditOpen}>
@@ -274,7 +274,7 @@ export default function CategoryPage({ params }: { params: Promise<{ categoryId:
                         </p>
                       </div>
                     </div>
-                    {isAdmin ? (
+                    {isAdmin || isAssistantAdmin ? (
                       <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                         <Button
                           variant="outline"

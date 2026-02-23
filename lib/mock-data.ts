@@ -1,5 +1,5 @@
 // Mock user data
-export type UserRole = "student" | "admin"
+export type UserRole = "student" | "admin" | "assistant_admin"
 
 export interface User {
   id: string
@@ -30,6 +30,15 @@ export const adminUser: User = {
   role: "admin",
   grade: "",
   phone: "010-9999-0000",
+}
+
+export const assistantAdminUser: User = {
+  id: "asst-1",
+  name: "손현우",
+  email: "sohn.hyunwoo@example.com",
+  role: "assistant_admin",
+  grade: "",
+  phone: "010-9999-9999",
 }
 
 // Q&A Board
@@ -518,5 +527,81 @@ export const assignments: Assignment[] = [
     dueDate: "2026-02-03",
     assignedTo: ["user-1", "user-3"],
     status: "마감",
+  },
+];
+
+// Assistant Admin Management
+export interface AssistantInvite {
+  id: string
+  name: string
+  email: string
+  invitedAt: string
+  inviteCount: number
+  lastInvitedAt: string
+}
+
+export interface AssistantSignup {
+  id: string
+  name: string
+  email: string
+  signedUpAt: string
+  status: "대기중" | "수락" | "거절"
+}
+
+export interface Assistant {
+  id: string
+  name: string
+  email: string
+  assignedAt: string
+}
+
+export const assistantInvites: AssistantInvite[] = [
+  {
+    id: "invite-1",
+    name: "박준호",
+    email: "park.junho@example.com",
+    invitedAt: "2026-02-01",
+    inviteCount: 3,
+    lastInvitedAt: "2026-02-20",
+  },
+  {
+    id: "invite-2",
+    name: "최수진",
+    email: "choi.sujin@example.com",
+    invitedAt: "2026-02-05",
+    inviteCount: 2,
+    lastInvitedAt: "2026-02-18",
+  },
+];
+
+export const assistantSignups: AssistantSignup[] = [
+  {
+    id: "signup-1",
+    name: "이준호",
+    email: "lee.junho@example.com",
+    signedUpAt: "2026-02-22",
+    status: "대기중",
+  },
+  {
+    id: "signup-2",
+    name: "김민지",
+    email: "kim.minji@example.com",
+    signedUpAt: "2026-02-21",
+    status: "대기중",
+  },
+];
+
+export const assistants: Assistant[] = [
+  {
+    id: "asst-1",
+    name: "손현우",
+    email: "sohn.hyunwoo@example.com",
+    assignedAt: "2026-01-15",
+  },
+  {
+    id: "asst-2",
+    name: "정유진",
+    email: "jung.yujin@example.com",
+    assignedAt: "2026-02-01",
   },
 ];

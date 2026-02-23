@@ -43,6 +43,8 @@ function QnaPostItem({
   post,
   currentUserId,
   isAdmin,
+  isAssistantAdmin,
+  isStaff,
   onUpdateQuestion,
   onDeleteQuestion,
   onUpdateAnswer,
@@ -52,6 +54,8 @@ function QnaPostItem({
   post: QnaPost
   currentUserId: string
   isAdmin: boolean
+  isAssistantAdmin: boolean
+  isStaff: boolean
   onUpdateQuestion: (postId: string, title: string, content: string, attachments?: Array<{
     name: string
     size: number
@@ -79,7 +83,7 @@ function QnaPostItem({
   const editFileInputRef = useRef<HTMLInputElement>(null)
 
   const isOwner = post.authorId === currentUserId
-  const canView = isOwner || isAdmin
+  const canView = isOwner || isAdmin || isAssistantAdmin
 
   const handleEditFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -462,7 +466,7 @@ function QnaPostItem({
                         <span className="text-xs text-muted-foreground">{post.answeredAt}</span>
                       </div>
                       {/* Answer edit/delete buttons for admin */}
-                      {isAdmin && (
+                      {(isAdmin || isAssistantAdmin) && (
                         <div className="flex gap-1">
                           <Dialog open={editAnswerOpen} onOpenChange={setEditAnswerOpen}>
                             <DialogTrigger asChild>
@@ -532,7 +536,7 @@ function QnaPostItem({
                   </div>
                 )}
                 {/* Admin answer button */}
-                {isAdmin && !post.answer && (
+                {(isAdmin || isAssistantAdmin) && !post.answer && (
                   <div className="mt-3 flex justify-end">
                     <Dialog open={answerOpen} onOpenChange={setAnswerOpen}>
                       <DialogTrigger asChild>
@@ -595,7 +599,7 @@ function QnaPostItem({
 }
 
 export default function QnaPage() {
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, isAssistantAdmin, isStaff } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [posts, setPosts] = useState<QnaPost[]>(initialQnaPosts)
@@ -629,7 +633,7 @@ export default function QnaPage() {
 
   const filteredPosts = posts.filter((post) => {
     if (!searchQuery) return true
-    if (isAdmin || post.authorId === user?.id) {
+    if (isAdmin || isAssistantAdmin || post.authorId === user?.id) {
       return post.title.includes(searchQuery) || post.content.includes(searchQuery)
     }
     return false
@@ -752,12 +756,12 @@ export default function QnaPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">문의/질의응답</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isAdmin
+            {isAdmin || isAssistantAdmin
               ? "학생들의 질문을 확인하고 답변하세요."
               : "궁금한 점을 질문하세요. 모든 게시글은 비공개로 처리됩니다."}
           </p>
         </div>
-        {!isAdmin && (
+        {(!isAdmin || !isAssistantAdmin) && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
@@ -884,7 +888,7 @@ export default function QnaPage() {
       <div className="mb-6 flex items-center gap-3 rounded-xl border border-purple-500/20 bg-purple-500/5 px-4 py-3">
         <Lock className="h-5 w-5 flex-shrink-0 text-purple-400" />
         <p className="text-sm text-foreground">
-          {isAdmin ? (
+          {isAdmin || isAssistantAdmin ? (
             <>관리자는 모든 질문의 내용을 확인하고 답변할 수 있습니다.</>
           ) : (
             <>
@@ -899,7 +903,7 @@ export default function QnaPage() {
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder={isAdmin ? "질문 검색" : "내 질문 검색"}
+          placeholder={isAdmin || isAssistantAdmin ? "질문 검색" : "내 질문 검색"}
           className="pl-9"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -914,6 +918,8 @@ export default function QnaPage() {
             post={post}
             currentUserId={user?.id || ""}
             isAdmin={isAdmin}
+            isAssistantAdmin={isAssistantAdmin}
+            isStaff={isStaff}
             onUpdateQuestion={handleUpdateQuestion}
             onDeleteQuestion={handleDeleteQuestion}
             onUpdateAnswer={handleUpdateAnswer}

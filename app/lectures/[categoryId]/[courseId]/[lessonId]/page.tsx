@@ -93,7 +93,7 @@ export default function LessonPage({
   params: Promise<{ categoryId: string; courseId: string; lessonId: string }>
 }) {
   const { categoryId, courseId, lessonId } = use(params)
-  const { isAdmin } = useAuth()
+  const { isAdmin, isAssistantAdmin, isStaff } = useAuth()
   const playerRef = useRef<any>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   
@@ -333,7 +333,7 @@ export default function LessonPage({
             <Badge variant="secondary">{category.name}</Badge>
           </div>
         </div>
-        {isAdmin && (
+        {(isAdmin || isAssistantAdmin) && (
           <Dialog open={editOpen} onOpenChange={setEditOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2 bg-transparent">
@@ -408,7 +408,7 @@ export default function LessonPage({
               </TabsTrigger>
             </TabsList>
             <TabsContent value="timemarks" className="mt-3">
-              {isAdmin && (
+              {(isAdmin || isAssistantAdmin) && (
                 <Dialog open={addTimemarkOpen} onOpenChange={setAddTimemarkOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm" className="mb-3 w-full gap-1.5 bg-transparent">
@@ -517,7 +517,7 @@ export default function LessonPage({
                             </span>
                             <span className="flex-1 text-sm text-foreground">{mark.label}</span>
                           </button>
-                          {isAdmin && (
+                          {(isAdmin || isAssistantAdmin) && (
                             <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                               <Button
                                 size="icon"
@@ -552,7 +552,7 @@ export default function LessonPage({
               </Card>
             </TabsContent>
             <TabsContent value="resources" className="mt-3">
-              {isAdmin && (
+              {(isAdmin || isAssistantAdmin) && (
                 <Dialog open={uploadResourceOpen} onOpenChange={setUploadResourceOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm" className="mb-3 w-full gap-1.5 bg-transparent">
@@ -633,7 +633,7 @@ export default function LessonPage({
                             <Button variant="ghost" size="icon" className="h-8 w-8">
                               <Download className="h-4 w-4" />
                             </Button>
-                            {isAdmin && (
+                            {(isAdmin || isAssistantAdmin) && (
                               <Button
                                 variant="ghost"
                                 size="icon"

@@ -37,6 +37,8 @@ function ConsultationItem({
   item,
   currentUserId,
   isAdmin,
+  isAssistantAdmin,
+  isStaff,
   onUpdateConsultation,
   onDeleteConsultation,
   onUpdateAnswer,
@@ -45,6 +47,8 @@ function ConsultationItem({
   item: Consultation
   currentUserId: string
   isAdmin: boolean
+  isAssistantAdmin: boolean
+  isStaff: boolean
   onUpdateConsultation: (id: string, title: string, content: string) => void
   onDeleteConsultation: (id: string) => void
   onUpdateAnswer: (id: string, answer: string, status: Consultation["status"]) => void
@@ -65,7 +69,7 @@ function ConsultationItem({
   const answerTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   const isOwner = item.authorId === currentUserId
-  const canView = isOwner || isAdmin
+  const canView = isOwner || isAdmin || isAssistantAdmin
 
   return (
     <Card className="border-border transition-shadow hover:shadow-sm">
@@ -203,7 +207,7 @@ function ConsultationItem({
                         <span className="text-xs text-muted-foreground">{item.answeredAt}</span>
                       </div>
                       {/* Answer edit/delete buttons for admin */}
-                      {isAdmin && (
+                      {isAdmin || isAssistantAdmin && (
                         <div className="flex gap-1">
                           <Dialog open={editAnswerOpen} onOpenChange={setEditAnswerOpen}>
                             <DialogTrigger asChild>
@@ -273,7 +277,7 @@ function ConsultationItem({
                 )}
 
                 {/* Admin answer button */}
-                {isAdmin && !item.answer && (
+                {(isAdmin || isAssistantAdmin) && !item.answer && (
                   <div className="mt-3 flex justify-end">
                     <Dialog open={answerOpen} onOpenChange={setAnswerOpen}>
                       <DialogTrigger asChild>
@@ -351,7 +355,7 @@ function ConsultationItem({
 }
 
 export default function ConsultationPage() {
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, isAssistantAdmin, isStaff } = useAuth()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [consultations, setConsultations] = useState<Consultation[]>(initialConsultations)
   const [newTitle, setNewTitle] = useState("")
@@ -439,12 +443,12 @@ export default function ConsultationPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">학습 상담</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isAdmin
+            {isAdmin || isAssistantAdmin
               ? "학생들의 상담 요청을 확인하고 답변하세요."
               : "학습 방향, 진로 등 고민에 대해 자유롭게 남겨주세요."}
           </p>
         </div>
-        {!isAdmin && (
+        {(!isAdmin || !isAssistantAdmin) && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
@@ -554,7 +558,7 @@ export default function ConsultationPage() {
       <div className="mb-6 flex items-center gap-3 rounded-xl border border-purple-500/20 bg-purple-500/5 px-4 py-3">
         <Lock className="h-5 w-5 flex-shrink-0 text-purple-400" />
         <p className="text-sm text-foreground">
-          {isAdmin ? (
+          {isAdmin || isAssistantAdmin ? (
             <>관리자는 모든 상담 내용을 확인하고 답변할 수 있습니다.</>
           ) : (
             <>
@@ -572,6 +576,8 @@ export default function ConsultationPage() {
             item={item}
             currentUserId={user?.id || ""}
             isAdmin={isAdmin}
+            isAssistantAdmin={isAssistantAdmin}
+            isStaff={isStaff}
             onUpdateConsultation={handleUpdateConsultation}
             onDeleteConsultation={handleDeleteConsultation}
             onUpdateAnswer={handleUpdateAnswer}

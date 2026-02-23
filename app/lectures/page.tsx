@@ -35,7 +35,7 @@ interface CategoryFormData {
 }
 
 export default function LecturesPage() {
-  const { isAdmin, user } = useAuth()
+  const { isAdmin, isAssistantAdmin, isStaff, user } = useAuth()
   const [addOpen, setAddOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -58,7 +58,7 @@ export default function LecturesPage() {
   }
 
   const getVisibleCategories = () => {
-    if (isAdmin) {
+    if (isAdmin || isAssistantAdmin) {
       return lectureCategories
     }
     return lectureCategories.filter((category) => {
@@ -280,12 +280,12 @@ export default function LecturesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">복습 영상</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isAdmin
+            {isAdmin || isAssistantAdmin
               ? "강의 카테고리를 관리합니다."
               : "강의 카테고리를 선택하여 복습 영상을 시청하세요."}
           </p>
         </div>
-        {isAdmin && (
+        {(isAdmin || isAssistantAdmin) && (
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
@@ -459,7 +459,7 @@ export default function LecturesPage() {
         {visibleCategories.length === 0 ? (
           <div className="col-span-full py-12 text-center">
             <p className="text-sm text-muted-foreground">
-              {isAdmin
+              {isAdmin || isAssistantAdmin
                 ? "카테고리가 없습니다."
                 : "현재 할당된 강의 카테고리가 없습니다."}
             </p>
@@ -484,7 +484,7 @@ export default function LecturesPage() {
                       <span className="text-xs text-muted-foreground">{category.courseCount}개 강좌</span>
                     </div>
                     {/* 관리자 뷰: 할당된 학생 정보 표시 */}
-                    {isAdmin && (
+                    {(isAdmin || isAssistantAdmin) && (
                       category.assignedTo && category.assignedTo.length > 0 ? (
                         <div className="mt-3 pt-3 border-t border-border/50">
                           <p className="text-xs text-muted-foreground mb-2">지정된 학생:</p>
@@ -508,7 +508,7 @@ export default function LecturesPage() {
                   </CardContent>
                 </Card>
               </Link>
-              {isAdmin && (
+              {(isAdmin || isAssistantAdmin) && (
                 <div className="absolute bottom-5 right-5 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                   <Button
                     size="icon"

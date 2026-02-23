@@ -40,6 +40,8 @@ function QnaPostItem({
   post,
   currentUserId,
   isAdmin,
+  isAssistantAdmin,
+  isStaff,
   onUpdateQuestion,
   onDeleteQuestion,
   onUpdateAnswer,
@@ -49,6 +51,8 @@ function QnaPostItem({
   post: QnaPost
   currentUserId: string
   isAdmin: boolean
+  isAssistantAdmin: boolean
+  isStaff: boolean
   onUpdateQuestion: (postId: string, title: string, content: string, attachments?: Array<{
     name: string
     size: number
@@ -76,7 +80,7 @@ function QnaPostItem({
   const editFileInputRef = useRef<HTMLInputElement>(null)
 
   const isOwner = post.authorId === currentUserId
-  const canView = isOwner || isAdmin
+  const canView = isOwner || isAdmin || isAssistantAdmin
 
   const handleEditFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -434,7 +438,7 @@ function QnaPostItem({
                   </div>
                 )}
 
-                {isAdmin && !post.answer && (
+                {(isAdmin || isAssistantAdmin) && !post.answer && (
                   <div className="mt-3 flex justify-end">
                     <Dialog open={answerOpen} onOpenChange={setAnswerOpen}>
                       <DialogTrigger asChild>
@@ -498,7 +502,7 @@ function QnaPostItem({
 
 export default function PendingQnaPage() {
   const router = useRouter()
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, isAssistantAdmin, isStaff } = useAuth()
   const [posts, setPosts] = useState<QnaPost[]>(initialQnaPosts)
 
   useEffect(() => {
@@ -583,6 +587,8 @@ export default function PendingQnaPage() {
               post={post}
               currentUserId={user?.id || ""}
               isAdmin={isAdmin}
+              isAssistantAdmin={isAssistantAdmin}
+              isStaff={isStaff}
               onUpdateQuestion={handleUpdateQuestion}
               onDeleteQuestion={handleDeleteQuestion}
               onUpdateAnswer={handleUpdateAnswer}

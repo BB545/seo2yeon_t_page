@@ -23,21 +23,11 @@ export default function LoginPage() {
     e.preventDefault()
     if (email === "admin@example.com") {
       login("admin")
+    } else if (email === "sohn.hyunwoo@example.com") {
+      login("assistant_admin")
     } else {
       login("student")
     }
-    router.push("/dashboard")
-  }
-
-  const handleQuickLogin = (role: "student" | "admin") => {
-    if (role === "admin") {
-      setEmail("admin@example.com")
-      setPassword("admin1234")
-    } else {
-      setEmail("minjun@example.com")
-      setPassword("student1234")
-    }
-    login(role)
     router.push("/dashboard")
   }
 
@@ -99,46 +89,6 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Quick login section */}
-            {/* <div className="mt-6">
-              <div className="relative mb-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-card px-3 text-muted-foreground">테스트 계정으로 바로 로그인</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin("student")}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/40 hover:bg-primary/5"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/10 text-sm font-bold text-blue-600">
-                    학
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-foreground">학생 계정</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">김민준 (고2)</p>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin("admin")}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/40 hover:bg-primary/5"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-bold text-emerald-600">
-                    관
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-foreground">관리자 계정</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">박선생 (관리자)</p>
-                  </div>
-                </button>
-              </div>
-            </div> */}
-
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">계정이 없으신가요?</span>{" "}
               <Link href="/signup" className="font-medium text-violet-600 hover:underline">
@@ -160,6 +110,10 @@ export default function LoginPage() {
               <div className="flex justify-between">
                 <span>관리자: admin@example.com</span>
                 <span>admin1234</span>
+              </div>
+              <div className="flex justify-between">
+                <span>조교: sohn.hyunwoo@example.com</span>
+                <span>assistant1234</span>
               </div>
             </div>
           </CardContent>

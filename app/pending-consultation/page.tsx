@@ -38,6 +38,8 @@ function ConsultationItem({
   item,
   currentUserId,
   isAdmin,
+  isAssistantAdmin,
+  isStaff,
   onUpdateConsultation,
   onDeleteConsultation,
   onUpdateAnswer,
@@ -46,6 +48,8 @@ function ConsultationItem({
   item: Consultation
   currentUserId: string
   isAdmin: boolean
+  isAssistantAdmin: boolean
+  isStaff: boolean
   onUpdateConsultation: (id: string, title: string, content: string) => void
   onDeleteConsultation: (id: string) => void
   onUpdateAnswer: (id: string, answer: string, status: Consultation["status"]) => void
@@ -66,7 +70,7 @@ function ConsultationItem({
   const answerTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   const isOwner = item.authorId === currentUserId
-  const canView = isOwner || isAdmin
+  const canView = isOwner || isAdmin || isAssistantAdmin
 
   return (
     <Card className="border-border transition-shadow hover:shadow-sm">
@@ -202,7 +206,7 @@ function ConsultationItem({
                         </Badge>
                         <span className="text-xs text-muted-foreground">{item.answeredAt}</span>
                       </div>
-                      {isAdmin && (
+                      {(isAdmin || isAssistantAdmin) && (
                         <div className="flex gap-1">
                           <Dialog open={editAnswerOpen} onOpenChange={setEditAnswerOpen}>
                             <DialogTrigger asChild>
@@ -271,7 +275,7 @@ function ConsultationItem({
                   </div>
                 )}
 
-                {isAdmin && !item.answer && (
+                {(isAdmin || isAssistantAdmin) && !item.answer && (
                   <div className="mt-3 flex justify-end">
                     <Dialog open={answerOpen} onOpenChange={setAnswerOpen}>
                       <DialogTrigger asChild>
@@ -350,7 +354,7 @@ function ConsultationItem({
 
 export default function PendingConsultationPage() {
   const router = useRouter()
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, isAssistantAdmin, isStaff } = useAuth()
   const [consultations, setConsultations] = useState<Consultation[]>(initialConsultations)
 
   useEffect(() => {
@@ -428,6 +432,8 @@ export default function PendingConsultationPage() {
               item={item}
               currentUserId={user?.id || ""}
               isAdmin={isAdmin}
+              isAssistantAdmin={isAssistantAdmin}
+              isStaff={isStaff}
               onUpdateConsultation={handleUpdateConsultation}
               onDeleteConsultation={handleDeleteConsultation}
               onUpdateAnswer={handleUpdateAnswer}
