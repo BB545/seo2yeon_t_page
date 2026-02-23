@@ -30,7 +30,7 @@ export default function CoursePage({
   params: Promise<{ categoryId: string; courseId: string }>
 }) {
   const { categoryId, courseId } = use(params)
-  const { isAdmin } = useAuth()
+  const { isAdmin, isAssistantAdmin, isStaff } = useAuth()
   const [addOpen, setAddOpen] = useState(false)
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null)
   const [editLessonData, setEditLessonData] = useState<LessonFormData>({
@@ -128,7 +128,7 @@ export default function CoursePage({
             총 {courseLessons.length}개 수업
           </p>
         </div>
-        {isAdmin && (
+        {(isAdmin || isAssistantAdmin) && (
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
@@ -199,7 +199,7 @@ export default function CoursePage({
                         <span>{lesson.resources.length}개 자료</span>
                       </div>
                     </div>
-                    {isAdmin && (
+                    {(isAdmin || isAssistantAdmin) && (
                       <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                         <Button
                           variant="outline"

@@ -24,9 +24,7 @@ import { useRouter } from "next/navigation"
 
 function statusColor(status: Consultation["status"]) {
   switch (status) {
-    case "접수완료":
-      return "bg-blue-500/10 text-blue-600 hover:bg-blue-500/10"
-    case "상담진행중":
+    case "대기중":
       return "bg-amber-500/10 text-amber-600 hover:bg-amber-500/10"
     case "답변완료":
       return "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10"
@@ -227,7 +225,7 @@ export default function MyConsultationPage() {
         authorId: user?.id || "",
         authorName: user?.name || "익명",
         createdAt: new Date().toLocaleDateString("ko-KR"),
-        status: "접수완료",
+        status: "대기중",
         answer: undefined,
         answeredAt: undefined,
       }

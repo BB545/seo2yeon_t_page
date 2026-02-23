@@ -32,13 +32,30 @@ const navItems = [
 export function SidebarNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, isAdmin, logout } = useAuth()
+  const { user, isAdmin, isAssistantAdmin, isStaff, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleLogout = () => {
     router.replace("/")
     logout()
   }
+
+  const cleanSchoolName = (name: string) => {
+    return name
+      .replace(/학교|등학교/g, "")
+      .trim()
+  }
+
+  const cleanGrade = (grade: string) => {
+    return grade
+      .replace(/고등학교|중학교|초등학교/g, "")
+      .trim()
+  }
+
+  const finalSchool = cleanSchoolName(user?.school || "")
+  const finalGrade = cleanGrade(user?.grade || "")
+
+  const combinedSchoolGrade = `${finalSchool} ${finalGrade}`
 
   return (
     <>
@@ -134,7 +151,7 @@ export function SidebarNav() {
             <div
               className={cn(
                 "flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold",
-                isAdmin
+                isAdmin || isAssistantAdmin
                   ? "bg-rose-500/10 text-rose-600"
                   : "bg-violet-500/10 text-violet-600"
               )}
@@ -144,7 +161,7 @@ export function SidebarNav() {
             <div className="flex-1 overflow-hidden">
               <div className="flex items-center gap-1.5">
                 <p className="truncate text-sm font-medium text-foreground">{user?.name}</p>
-                {isAdmin ? (
+                {isAdmin || isAssistantAdmin ? (
                   <Badge className="gap-0.5 bg-rose-500/10 px-1.5 py-0 text-[10px] text-rose-600 hover:bg-rose-500/10">
                     <Shield className="h-2.5 w-2.5" />
                     관리자
@@ -157,7 +174,8 @@ export function SidebarNav() {
                 )}
               </div>
               <p className="truncate text-xs text-muted-foreground">
-                {isAdmin ? "선생님" : user?.grade}
+                {isAdmin ? "선생님" : isAssistantAdmin
+                  ? "조교" : combinedSchoolGrade}
               </p>
             </div>
             <button

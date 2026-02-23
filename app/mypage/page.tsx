@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AppLayout } from "@/components/app-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Trash2, Eye, EyeOff, AlertTriangle } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
+type SchoolResult = {
+  name: string
+  address?: string
+  kind?: string
+}
+
 export default function MyPage() {
   const router = useRouter()
   const { user } = useAuth()
@@ -20,6 +26,17 @@ export default function MyPage() {
   const [isPasswordMatch, setIsPasswordMatch] = useState<boolean | null>(null)
   const [showConfirm, setShowConfirm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [schoolQuery, setSchoolQuery] = useState(user?.school || "")
+  const [selectedSchool, setSelectedSchool] = useState<SchoolResult | null>(null)
+  const [schoolResults, setSchoolResults] = useState<SchoolResult[]>([])
+  const [isSchoolLoading, setIsSchoolLoading] = useState(false)
+  const [isUserTyping, setIsUserTyping] = useState(false)
+  const [showSchoolDropdown, setShowSchoolDropdown] = useState(false)
+  const [region, setRegion] = useState<string>(user?.region || "")
+  const schoolBoxRef = useRef<HTMLDivElement | null>(null)
+
+  const KEY = "키값"
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -55,6 +72,43 @@ export default function MyPage() {
       setIsPasswordMatch(false)
     }
   }, [formData.newPassword, formData.confirmPassword])
+
+  useEffect(() => {
+    if (!isUserTyping) return
+    const q = schoolQuery.trim()
+    if (q.length < 2) {
+      setSchoolResults([])
+      return
+    }
+
+    setIsSchoolLoading(true)
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://open.neis.go.kr/hub/schoolInfo?KEY=${KEY}&Type=json&SCHUL_NM=${encodeURIComponent(q)}${region ? `&LCTN_SC_NM=${encodeURIComponent(region)}` : ""}`
+        )
+
+        const data = await res.json()
+        const rows = data.schoolInfo?.[1]?.row ?? []
+
+        const parsed = rows.map((item: any) => ({
+          name: item.SCHUL_NM,
+          address: item.ORG_RDNMA,
+          kind: item.SCHUL_KND_SC_NM
+        }))
+
+        setSchoolResults(parsed)
+        setShowSchoolDropdown(true)
+      } catch {
+        setSchoolResults([])
+      } finally {
+        setIsSchoolLoading(false)
+      }
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [schoolQuery, region])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
@@ -162,23 +216,112 @@ export default function MyPage() {
                   />
                 </div>
 
-                {/* Grade */}
-                <div className="space-y-2">
-                  <Label htmlFor="grade">학년</Label>
-                  <Select value={formData.grade} onValueChange={handleGradeChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="학년을 선택하세요" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="중학교 1학년">중학교 1학년</SelectItem>
-                      <SelectItem value="중학교 2학년">중학교 2학년</SelectItem>
-                      <SelectItem value="중학교 3학년">중학교 3학년</SelectItem>
-                      <SelectItem value="고등학교 1학년">고등학교 1학년</SelectItem>
-                      <SelectItem value="고등학교 2학년">고등학교 2학년</SelectItem>
-                      <SelectItem value="고등학교 3학년">고등학교 3학년</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* School */}
+                <div className="space-y-2" ref={schoolBoxRef}>
+                  <Label>학교</Label>
+
+                  <div className="flex gap-2">
+                    {/* Region */}
+                    <div className="w-1/3">
+                      <Select value={region} onValueChange={(v) => setRegion(v)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="지역" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="서울특별시">서울</SelectItem>
+                          <SelectItem value="경기도">경기</SelectItem>
+                          <SelectItem value="부산광역시">부산</SelectItem>
+                          <SelectItem value="대구광역시">대구</SelectItem>
+                          <SelectItem value="인천광역시">인천</SelectItem>
+                          <SelectItem value="광주광역시">광주</SelectItem>
+                          <SelectItem value="대전광역시">대전</SelectItem>
+                          <SelectItem value="울산광역시">울산</SelectItem>
+                          <SelectItem value="세종특별자치시">세종</SelectItem>
+                          <SelectItem value="강원특별자치도">강원</SelectItem>
+                          <SelectItem value="충청북도">충북</SelectItem>
+                          <SelectItem value="충청남도">충남</SelectItem>
+                          <SelectItem value="전북특별자치도">전북</SelectItem>
+                          <SelectItem value="전라남도">전남</SelectItem>
+                          <SelectItem value="경상북도">경북</SelectItem>
+                          <SelectItem value="경상남도">경남</SelectItem>
+                          <SelectItem value="제주특별자치도">제주</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* School Search */}
+                    <div className="w-2/3 relative">
+                      <Input
+                        placeholder="학교명을 입력하세요"
+                        value={schoolQuery}
+                        onChange={(e) => {
+                          setIsUserTyping(true)
+                          setSchoolQuery(e.target.value)
+                          setSelectedSchool(null)
+                        }}
+                      />
+
+                      {showSchoolDropdown && (
+                        <div className="absolute z-50 mt-2 w-full rounded-md border bg-white shadow-sm max-h-60 overflow-auto">
+                          {isSchoolLoading && (
+                            <div className="p-2 text-sm text-muted-foreground">검색 중...</div>
+                          )}
+
+                          {!isSchoolLoading &&
+                            schoolResults.map((s, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedSchool(s)
+                                  setSchoolQuery(s.name)
+                                  setShowSchoolDropdown(false)
+
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    grade: ""
+                                  }))
+                                }}
+                                className="w-full px-3 py-2 text-left hover:bg-gray-100"
+                              >
+                                <div className="font-medium">{s.name}</div>
+                                {s.address && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {s.address}
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+
+                          {!isSchoolLoading && schoolResults.length === 0 && (
+                            <div className="p-2 text-sm text-muted-foreground">
+                              검색 결과 없음
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
+
+                {/* Grade */}
+                <Select
+                  value={formData.grade}
+                  onValueChange={(value) => {
+                    if (!selectedSchool?.kind) return
+                    const finalValue = `${selectedSchool.kind} ${value}`
+                    handleGradeChange(finalValue)
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="학년을 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1학년">1학년</SelectItem>
+                    <SelectItem value="2학년">2학년</SelectItem>
+                    <SelectItem value="3학년">3학년</SelectItem>
+                  </SelectContent>
+                </Select>
 
                 <div className="border-t pt-6">
                   <h3 className="text-sm font-semibold text-foreground mb-4">비밀번호 변경</h3>

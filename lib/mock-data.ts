@@ -1,5 +1,5 @@
 // Mock user data
-export type UserRole = "student" | "admin"
+export type UserRole = "student" | "admin" | "assistant_admin"
 
 export interface User {
   id: string
@@ -8,6 +8,8 @@ export interface User {
   role: UserRole
   grade: string
   phone: string
+  region?: string
+  school?: string
 }
 
 export const currentUser: User = {
@@ -17,6 +19,8 @@ export const currentUser: User = {
   role: "student",
   grade: "고등학교 2학년",
   phone: "010-1234-5678",
+  region: "서울특별시",
+  school: "가고등학교",
 }
 
 export const adminUser: User = {
@@ -26,6 +30,15 @@ export const adminUser: User = {
   role: "admin",
   grade: "",
   phone: "010-9999-0000",
+}
+
+export const assistantAdminUser: User = {
+  id: "asst-1",
+  name: "손현우",
+  email: "sohn.hyunwoo@example.com",
+  role: "assistant_admin",
+  grade: "",
+  phone: "010-9999-9999",
 }
 
 // Q&A Board
@@ -219,16 +232,16 @@ export const lectureCategories: LectureCategory[] = [
 ];
 
 export const courses: Course[] = [
-  { id: "course-1", categoryId: "cat-1", name: "미적분 기초반", lessonCount: 3 },
-  { id: "course-2", categoryId: "cat-1", name: "확률과 통계", lessonCount: 0 },
-  { id: "course-3", categoryId: "cat-1", name: "기하 심화반", lessonCount: 0 },
-  { id: "course-4", categoryId: "cat-2", name: "수능 독해 마스터", lessonCount: 0 },
-  { id: "course-5", categoryId: "cat-2", name: "영문법 완성", lessonCount: 0 },
-  { id: "course-6", categoryId: "cat-3", name: "문학 개념 정리", lessonCount: 0 },
-  { id: "course-7", categoryId: "cat-3", name: "비문학 독해 전략", lessonCount: 0 },
-  { id: "course-8", categoryId: "cat-4", name: "물리학 I", lessonCount: 0 },
-  { id: "course-9", categoryId: "cat-4", name: "화학 I", lessonCount: 0 },
-  { id: "course-10", categoryId: "cat-4", name: "생명과학 I", lessonCount: 0 },
+  { id: "course-1", categoryId: "cat-1", name: "미적분 기본 개념반", lessonCount: 3 },
+  { id: "course-2", categoryId: "cat-1", name: "미적분 응용 문제반", lessonCount: 0 },
+  { id: "course-3", categoryId: "cat-1", name: "미적분 심화 풀이반", lessonCount: 0 },
+  { id: "course-4", categoryId: "cat-2", name: "수열 개념 완성반", lessonCount: 0 },
+  { id: "course-5", categoryId: "cat-2", name: "수열 문제 풀이 전략반", lessonCount: 0 },
+  { id: "course-6", categoryId: "cat-3", name: "확률과 통계 개념 완성", lessonCount: 0 },
+  { id: "course-7", categoryId: "cat-3", name: "확률과 통계 문제 풀이반", lessonCount: 0 },
+  { id: "course-8", categoryId: "cat-4", name: "기하 개념 완성반", lessonCount: 0 },
+  { id: "course-9", categoryId: "cat-4", name: "벡터 심화 풀이반", lessonCount: 0 },
+  { id: "course-10", categoryId: "cat-4", name: "기하와 벡터 실전 문제반", lessonCount: 0 },
 ]
 
 export const lessons: Lesson[] = [
@@ -291,7 +304,7 @@ export interface Consultation {
   title: string
   content: string
   createdAt: string
-  status: "접수완료" | "상담진행중" | "답변완료"
+  status: "대기중" | "답변완료"
   answer?: string
   answeredAt?: string
 }
@@ -315,7 +328,7 @@ export const consultations: Consultation[] = [
     title: "진로 관련 상담 신청",
     content: "문과에서 이과로 교차지원을 고려하고 있는데, 가능한 학과와 준비 방법이 궁금합니다.",
     createdAt: "2026-02-07",
-    status: "상담진행중",
+    status: "대기중",
   },
   {
     id: "consult-3",
@@ -324,7 +337,7 @@ export const consultations: Consultation[] = [
     title: "학습 스케줄 조정 상담",
     content: "학교 내신과 수능 준비를 병행하려면 어떻게 스케줄을 짜면 좋을까요?",
     createdAt: "2026-02-05",
-    status: "접수완료",
+    status: "대기중",
   },
 ]
 
@@ -354,14 +367,20 @@ export interface Student {
   id: string
   name: string
   grade: string
+  region: string
+  school: string
 }
 
 export const students: Student[] = [
-  { id: "user-1", name: "김민준", grade: "고등학교 2학년" },
-  { id: "user-2", name: "이서연", grade: "고등학교 2학년" },
-  { id: "user-3", name: "정하준", grade: "고등학교 1학년" },
-  { id: "user-4", name: "최은서", grade: "고등학교 3학년" },
-  { id: "user-5", name: "박지호", grade: "고등학교 2학년" },
+  { id: "user-1", name: "김민준", grade: "고등학교 2학년", region: "서울특별시", school: "가고등학교" },
+  { id: "user-2", name: "이서연", grade: "고등학교 2학년", region: "서울특별시", school: "나고등학교" },
+  { id: "user-3", name: "정하준", grade: "고등학교 1학년", region: "서울특별시", school: "가고등학교" },
+  { id: "user-4", name: "최은서", grade: "고등학교 3학년", region: "서울특별시", school: "다고등학교" },
+  { id: "user-5", name: "박지호", grade: "고등학교 2학년", region: "서울특별시", school: "나고등학교" },
+  { id: "user-6", name: "김철수", grade: "중학교 1학년", region: "서울특별시", school: "가중학교" },
+  { id: "user-7", name: "이영희", grade: "중학교 3학년", region: "서울특별시", school: "나중학교" },
+  { id: "user-8", name: "조민지", grade: "중학교 2학년", region: "서울특별시", school: "나중학교" },
+  { id: "user-9", name: "박지우", grade: "중학교 2학년", region: "서울특별시", school: "다중학교" },
 ]
 
 // Assignments
@@ -508,5 +527,81 @@ export const assignments: Assignment[] = [
     dueDate: "2026-02-03",
     assignedTo: ["user-1", "user-3"],
     status: "마감",
+  },
+];
+
+// Assistant Admin Management
+export interface AssistantInvite {
+  id: string
+  name: string
+  email: string
+  invitedAt: string
+  inviteCount: number
+  lastInvitedAt: string
+}
+
+export interface AssistantSignup {
+  id: string
+  name: string
+  email: string
+  signedUpAt: string
+  status: "대기중" | "수락" | "거절"
+}
+
+export interface Assistant {
+  id: string
+  name: string
+  email: string
+  assignedAt: string
+}
+
+export const assistantInvites: AssistantInvite[] = [
+  {
+    id: "invite-1",
+    name: "박준호",
+    email: "park.junho@example.com",
+    invitedAt: "2026-02-01",
+    inviteCount: 3,
+    lastInvitedAt: "2026-02-20",
+  },
+  {
+    id: "invite-2",
+    name: "최수진",
+    email: "choi.sujin@example.com",
+    invitedAt: "2026-02-05",
+    inviteCount: 2,
+    lastInvitedAt: "2026-02-18",
+  },
+];
+
+export const assistantSignups: AssistantSignup[] = [
+  {
+    id: "signup-1",
+    name: "이준호",
+    email: "lee.junho@example.com",
+    signedUpAt: "2026-02-22",
+    status: "대기중",
+  },
+  {
+    id: "signup-2",
+    name: "김민지",
+    email: "kim.minji@example.com",
+    signedUpAt: "2026-02-21",
+    status: "대기중",
+  },
+];
+
+export const assistants: Assistant[] = [
+  {
+    id: "asst-1",
+    name: "손현우",
+    email: "sohn.hyunwoo@example.com",
+    assignedAt: "2026-01-15",
+  },
+  {
+    id: "asst-2",
+    name: "정유진",
+    email: "jung.yujin@example.com",
+    assignedAt: "2026-02-01",
   },
 ];

@@ -18,8 +18,9 @@ import {
   Shield,
   X,
   User,
+  Mail,
 } from "lucide-react"
-import { type Student, assignments, qnaPosts, consultations, students, submissions } from "@/lib/mock-data"
+import { type Student, assignments, qnaPosts, consultations, students, submissions, assistantInvites } from "@/lib/mock-data"
 import { useAuth } from "@/lib/auth-context"
 
 function StatCard({
@@ -183,11 +184,10 @@ function StudentDashboard() {
                     <p className="mt-1 text-xs text-muted-foreground">{post.createdAt}</p>
                   </div>
                   <Badge
-                    className={`ml-3 flex-shrink-0 ${
-                      post.answer
+                    className={`ml-3 flex-shrink-0 ${post.answer
                         ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10"
                         : "bg-amber-500/10 text-amber-600 hover:bg-amber-500/10"
-                    }`}
+                      }`}
                   >
                     {post.answer ? "답변완료" : "대기중"}
                   </Badge>
@@ -219,6 +219,86 @@ function StudentDashboard() {
   )
 }
 
+function AssistantInviteModal({
+  isOpen,
+  onClose,
+  onInvite,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onInvite: (name: string, email: string) => void
+}) {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (name.trim() && email.trim()) {
+      onInvite(name, email)
+      setName("")
+      setEmail("")
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
+          <CardTitle>조교 초대</CardTitle>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">이름</label>
+              <input
+                type="text"
+                placeholder="조교 이름"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">이메일</label>
+              <input
+                type="email"
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="flex-1"
+              >
+                취소
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-violet-600 hover:bg-violet-700 text-white"
+              >
+                초대 보내기
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 function StudentListModal({
   isOpen,
   onClose,
@@ -226,7 +306,28 @@ function StudentListModal({
   isOpen: boolean
   onClose: () => void
 }) {
-  const studentsByGrade = students.reduce(
+  const [selectedSchool, setSelectedSchool] = useState<string>("전체")
+
+  const studentsBySchool = students.reduce(
+    (acc, student) => {
+      const school = student.school || "미지정"
+      if (!acc[school]) {
+        acc[school] = []
+      }
+      acc[school].push(student)
+      return acc
+    },
+    {} as Record<string, Student[]>
+  )
+
+  const allSchools = ["전체", ...Object.keys(studentsBySchool).sort()]
+
+  const filteredStudents =
+    selectedSchool === "전체"
+      ? students
+      : studentsBySchool[selectedSchool] || []
+
+  const filteredStudentsByGrade = filteredStudents.reduce(
     (acc, student) => {
       const grade = student.grade || "미지정"
       if (!acc[grade]) {
@@ -238,7 +339,7 @@ function StudentListModal({
     {} as Record<string, Student[]>
   )
 
-  const sortedGrades = Object.keys(studentsByGrade).sort((a, b) => {
+  const sortedGrades = Object.keys(filteredStudentsByGrade).sort((a, b) => {
     if (a === "미지정") return 1
     if (b === "미지정") return -1
     return a.localeCompare(b)
@@ -248,8 +349,8 @@ function StudentListModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-        <CardHeader className="flex flex-row items-center justify-between border-b">
+      <Card className="w-[600px] h-[600px] overflow-hidden flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
           <CardTitle>등록 학생 목록</CardTitle>
           <button
             onClick={onClose}
@@ -258,30 +359,65 @@ function StudentListModal({
             <X className="h-5 w-5" />
           </button>
         </CardHeader>
+
+        <div className="border-b px-6 py-3 bg-muted/20">
+          <p className="text-xs font-medium text-muted-foreground mb-2">학교 선택</p>
+          <div className="flex flex-wrap gap-2">
+            {allSchools.map((school) => (
+              <button
+                key={school}
+                onClick={() => setSelectedSchool(school)}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors font-medium ${selectedSchool === school
+                    ? "bg-violet-500 text-white"
+                    : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
+                  }`}
+              >
+                {school}
+                <span className="ml-1 text-xs">
+                  ({school === "전체"
+                    ? students.length
+                    : studentsBySchool[school]?.length || 0})
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <CardContent className="flex-1 overflow-y-auto p-0">
-          {sortedGrades.map((grade) => (
-            <div key={grade} className="border-b last:border-b-0">
-              <div className="sticky top-0 bg-muted/50 px-6 py-3 font-semibold text-sm">
-                {grade}
-              </div>
-              <div className="divide-y">
-                {studentsByGrade[grade].map((student) => (
-                  <div
-                    key={student.id}
-                    className="flex items-center justify-between px-6 py-3 hover:bg-muted/30 transition-colors"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">{student.name}</p>
-                      <p className="text-xs text-muted-foreground">ID: {student.id}</p>
+          {sortedGrades.length > 0 ? (
+            sortedGrades.map((grade) => (
+              <div key={grade} className="border-b last:border-b-0">
+                <div className="sticky top-0 bg-muted/50 px-6 py-3 font-semibold text-sm flex items-center justify-between">
+                  <span>{grade}</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {filteredStudentsByGrade[grade].length}명
+                  </span>
+                </div>
+                <div className="divide-y">
+                  {filteredStudentsByGrade[grade].map((student) => (
+                    <div
+                      key={student.id}
+                      className="flex items-center justify-between px-6 py-3 hover:bg-muted/30 transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium text-foreground">{student.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          ID: {student.id} • {student.school}
+                        </p>
+                      </div>
+                      <Badge className="text-xs bg-violet-200 text-secondary-foreground hover:bg-violet-200 border-transparent">
+                        {student.grade}
+                      </Badge>
                     </div>
-                    <Badge className="text-xs bg-violet-200 text-secondary-foreground hover:bg-violet-200 border-transparent">
-                      {student.grade}
-                    </Badge>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="flex items-center justify-center h-40 text-muted-foreground">
+              해당 학교의 등록된 학생이 없습니다.
             </div>
-          ))}
+          )}
         </CardContent>
       </Card>
     </div>
@@ -289,13 +425,20 @@ function StudentListModal({
 }
 
 function AdminDashboard() {
+  const { isAdmin } = useAuth()
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false)
+  const [isAssistantInviteModalOpen, setIsAssistantInviteModalOpen] = useState(false)
   const totalStudents = students.length
   const totalAssignments = assignments.length
   const pendingQna = qnaPosts.filter((q) => !q.answer).length
   const pendingConsultations = consultations.filter(
     (c) => c.status !== "답변완료"
   ).length
+
+  const handleInviteAssistant = (name: string, email: string) => {
+    console.log("Inviting assistant:", { name, email })
+    setIsAssistantInviteModalOpen(false)
+  }
 
   return (
     <>
@@ -317,7 +460,7 @@ function AdminDashboard() {
             color="border-emerald-500 text-emerald-500"
           />
         </Link>
-        <Link href="/qna">
+        <Link href="/pending-qna">
           <StatCard
             icon={MessageSquareMore}
             label="미답변 질문"
@@ -325,10 +468,10 @@ function AdminDashboard() {
             color="border-amber-500 text-amber-500"
           />
         </Link>
-        <Link href="/consultation">
+        <Link href="/pending-consultation">
           <StatCard
             icon={GraduationCap}
-            label="진행중 상담"
+            label="미답변 상담"
             value={`${pendingConsultations}건`}
             color="border-rose-500 text-rose-500"
           />
@@ -338,6 +481,12 @@ function AdminDashboard() {
       <StudentListModal
         isOpen={isStudentModalOpen}
         onClose={() => setIsStudentModalOpen(false)}
+      />
+
+      <AssistantInviteModal
+        isOpen={isAssistantInviteModalOpen}
+        onClose={() => setIsAssistantInviteModalOpen(false)}
+        onInvite={handleInviteAssistant}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -392,7 +541,7 @@ function AdminDashboard() {
         <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base font-semibold">미답변 질문</CardTitle>
-            <Link href="/qna">
+            <Link href="/pending-qna">
               <Button
                 variant="ghost"
                 size="sm"
@@ -431,9 +580,9 @@ function AdminDashboard() {
         <Card className="border-border lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base font-semibold">
-              진행중인 상담
+              미답변 상담
             </CardTitle>
-            <Link href="/consultation">
+            <Link href="/pending-consultation">
               <Button
                 variant="ghost"
                 size="sm"
@@ -460,11 +609,10 @@ function AdminDashboard() {
                     </p>
                   </div>
                   <Badge
-                    className={`ml-3 flex-shrink-0 ${
-                      item.status === "접수완료"
-                        ? "bg-blue-500/10 text-blue-600 hover:bg-blue-500/10"
-                        : "bg-amber-500/10 text-amber-600 hover:bg-amber-500/10"
-                    }`}
+                    className={`ml-3 flex-shrink-0 ${item.status === "대기중"
+                        ? "bg-amber-500/10 text-amber-600 hover:bg-amber-500/10"
+                        : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/10"
+                      }`}
                   >
                     {item.status}
                   </Badge>
@@ -472,13 +620,49 @@ function AdminDashboard() {
               ))}
           </CardContent>
         </Card>
+
+        {/* Assistant Management */}
+        {isAdmin && (
+        <Card className="border-border lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-semibold">조교 관리</CardTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="default"
+                onClick={() => setIsAssistantInviteModalOpen(true)}
+                size="sm"
+              >
+                <Mail className="h-3.5 w-3.5 mr-1.5" />
+                초대하기
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="border-border lg:col-span-2">
+            <div className="flex flex-row items-center justify-between">
+              <div className="flex items-center gap-2">
+                <User className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base font-semibold">조교 목록</CardTitle>
+              </div>
+              <Link href="/admin-assistants">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="group p-0 h-auto bg-transparent hover:bg-transparent shadow-none text-muted-foreground hover:text-violet-600"
+                >
+                  전체보기 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+        )}
       </div>
     </>
   )
 }
 
 export default function DashboardPage() {
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, isAssistantAdmin, isStaff } = useAuth()
 
   if (!user) return null
 
@@ -490,7 +674,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-foreground">
             안녕하세요, {user?.name}님
           </h1>
-          {isAdmin ? (
+          {isAdmin || isAssistantAdmin ? (
             <Badge className="gap-1 bg-rose-500/10 text-rose-600 hover:bg-rose-500/10">
               <Shield className="h-3 w-3" />
               관리자
@@ -503,13 +687,13 @@ export default function DashboardPage() {
           )}
         </div>
         <p className="mt-1 text-muted-foreground">
-          {isAdmin
+          {isAdmin || isAssistantAdmin
             ? "관리자 대시보드에서 전체 현황을 확인하세요."
             : "오늘도 좋은 하루 되세요. 학습 현황을 확인해보세요."}
         </p>
       </div>
 
-      {isAdmin ? <AdminDashboard /> : <StudentDashboard />}
+      {isAdmin || isAssistantAdmin ? <AdminDashboard /> : <StudentDashboard />}
     </AppLayout>
   )
 }
