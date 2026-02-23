@@ -8,6 +8,8 @@ export interface User {
   role: UserRole
   grade: string
   phone: string
+  region?: string
+  school?: string
 }
 
 export const currentUser: User = {
@@ -17,6 +19,8 @@ export const currentUser: User = {
   role: "student",
   grade: "고등학교 2학년",
   phone: "010-1234-5678",
+  region: "서울특별시",
+  school: "가고등학교",
 }
 
 export const adminUser: User = {
@@ -354,15 +358,16 @@ export interface Student {
   id: string
   name: string
   grade: string
+  region: string
   school: string
 }
 
 export const students: Student[] = [
-  { id: "user-1", name: "김민준", grade: "고등학교 2학년", school: "가고등학교" },
-  { id: "user-2", name: "이서연", grade: "고등학교 2학년", school: "나고등학교" },
-  { id: "user-3", name: "정하준", grade: "고등학교 1학년", school: "가고등학교" },
-  { id: "user-4", name: "최은서", grade: "고등학교 3학년", school: "다고등학교" },
-  { id: "user-5", name: "박지호", grade: "고등학교 2학년", school: "나고등학교" },
+  { id: "user-1", name: "김민준", grade: "고등학교 2학년", region: "서울특별시", school: "가고등학교" },
+  { id: "user-2", name: "이서연", grade: "고등학교 2학년", region: "서울특별시", school: "나고등학교" },
+  { id: "user-3", name: "정하준", grade: "고등학교 1학년", region: "서울특별시", school: "가고등학교" },
+  { id: "user-4", name: "최은서", grade: "고등학교 3학년", region: "서울특별시", school: "다고등학교" },
+  { id: "user-5", name: "박지호", grade: "고등학교 2학년", region: "서울특별시", school: "나고등학교" },
 ]
 
 // Assignments
