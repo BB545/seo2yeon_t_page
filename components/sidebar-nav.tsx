@@ -40,6 +40,23 @@ export function SidebarNav() {
     logout()
   }
 
+  const cleanSchoolName = (name: string) => {
+    return name
+      .replace(/학교|등학교/g, "")
+      .trim()
+  }
+
+  const cleanGrade = (grade: string) => {
+    return grade
+      .replace(/고등학교|중학교|초등학교/g, "")
+      .trim()
+  }
+
+  const finalSchool = cleanSchoolName(user?.school || "")
+  const finalGrade = cleanGrade(user?.grade || "")
+
+  const combinedSchoolGrade = `${finalSchool} ${finalGrade}`
+
   return (
     <>
       {/* Mobile toggle */}
@@ -157,7 +174,7 @@ export function SidebarNav() {
                 )}
               </div>
               <p className="truncate text-xs text-muted-foreground">
-                {isAdmin ? "선생님" : user?.grade}
+                {isAdmin ? "선생님" : combinedSchoolGrade}
               </p>
             </div>
             <button
