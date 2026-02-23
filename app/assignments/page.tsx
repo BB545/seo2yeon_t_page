@@ -97,13 +97,12 @@ function StudentAssignmentCard({ assignment, currentUserId }: { assignment: Assi
               </span>
               {assignment.status === "진행중" && (
                 <span
-                  className={`font-medium ${
-                    days <= 2
-                      ? "text-destructive"
-                      : days <= 5
-                        ? "text-amber-600"
-                        : "text-muted-foreground"
-                  }`}
+                  className={`font-medium ${days <= 2
+                    ? "text-destructive"
+                    : days <= 5
+                      ? "text-amber-600"
+                      : "text-muted-foreground"
+                    }`}
                 >
                   {days > 0 ? `D-${days}` : "마감일 지남"}
                 </span>
@@ -407,6 +406,8 @@ function CreateAssignmentDialog({
   const [description, setDescription] = useState(initialData?.description || "")
   const [subject, setSubject] = useState(initialData?.subject || "")
   const [dueDate, setDueDate] = useState(initialData?.dueDate || "")
+  const [selectedSchoolCategory, setSelectedSchoolCategory] = useState<string>("all")
+  const [selectedSchoolCategoryEdit, setSelectedSchoolCategoryEdit] = useState<string>("all")
 
   // initialData가 변경될 때 상태를 업데이트
   useEffect(() => {
@@ -445,6 +446,139 @@ function CreateAssignmentDialog({
       updated.add(studentId)
     }
     setSelectedStudents(updated)
+  }
+
+  const selectAllStudents = () => {
+    setSelectedStudents(new Set(students.map((s) => s.id)))
+  }
+
+  const deselectAllStudents = () => {
+    setSelectedStudents(new Set())
+  }
+
+  const selectAllBySchool = (school: string) => {
+    const schoolStudents = students.filter((s) => s.school === school).map((s) => s.id)
+    const updated = new Set(selectedStudents)
+    schoolStudents.forEach((id) => updated.add(id))
+    setSelectedStudents(updated)
+  }
+
+  const deselectAllBySchool = (school: string) => {
+    const schoolStudents = students.filter((s) => s.school === school).map((s) => s.id)
+    const updated = new Set(selectedStudents)
+    schoolStudents.forEach((id) => updated.delete(id))
+    setSelectedStudents(updated)
+  }
+
+  const selectAllBySchoolAndGrade = (school: string, grade: string) => {
+    const filteredStudents = students
+      .filter((s) => s.school === school && s.grade === grade)
+      .map((s) => s.id)
+    const updated = new Set(selectedStudents)
+    filteredStudents.forEach((id) => updated.add(id))
+    setSelectedStudents(updated)
+  }
+
+  const deselectAllBySchoolAndGrade = (school: string, grade: string) => {
+    const filteredStudents = students
+      .filter((s) => s.school === school && s.grade === grade)
+      .map((s) => s.id)
+    const updated = new Set(selectedStudents)
+    filteredStudents.forEach((id) => updated.delete(id))
+    setSelectedStudents(updated)
+  }
+
+  const isAllStudentsSelected = () => {
+    return students.length > 0 && selectedStudents.size === students.length
+  }
+
+  const isAllSchoolStudentsSelected = (school: string) => {
+    const schoolStudents = students.filter((s) => s.school === school)
+    if (schoolStudents.length === 0) return false
+    return schoolStudents.every((s) => selectedStudents.has(s.id))
+  }
+
+  const isAllGradeStudentsSelected = (school: string, grade: string) => {
+    const gradeStudents = students.filter((s) => s.school === school && s.grade === grade)
+    if (gradeStudents.length === 0) return false
+    return gradeStudents.every((s) => selectedStudents.has(s.id))
+  }
+
+  const groupStudentsBySchool = () => {
+    const grouped: { [key: string]: typeof students } = {}
+    students.forEach((student) => {
+      if (!grouped[student.school]) {
+        grouped[student.school] = []
+      }
+      grouped[student.school].push(student)
+    })
+    return grouped
+  }
+
+  const groupStudentsByGrade = (schoolStudents: typeof students) => {
+    const grouped: { [key: string]: typeof students } = {}
+    schoolStudents.forEach((student) => {
+      if (!grouped[student.grade]) {
+        grouped[student.grade] = []
+      }
+      grouped[student.grade].push(student)
+    })
+    return grouped
+  }
+
+  const getStudentsByCategory = (categoryType: "all" | string) => {
+    if (categoryType === "all") {
+      return students
+    }
+    return students.filter((s) => s.school === categoryType)
+  }
+
+  const getSchools = () => {
+    const schools = new Set(students.map((s) => s.school))
+    return Array.from(schools).sort()
+  }
+
+  const cleanSchoolName = (name: string) => {
+    return name
+      .replace(/학교|등학교/g, "")
+      .trim()
+  }
+
+  const sortGrades = (grades: string[]) => {
+    return grades.sort((a, b) => {
+      const getOrder = (grade: string) => {
+        if (grade.includes("중학교")) {
+          const num = parseInt(grade.match(/\d+/)?.[0] || "0")
+          return num // 1,2,3
+        }
+        if (grade.includes("고등학교")) {
+          const num = parseInt(grade.match(/\d+/)?.[0] || "0")
+          return 10 + num // 11,12,13 (중학교 뒤에 오게)
+        }
+        return 99
+      }
+
+      return getOrder(a) - getOrder(b)
+    })
+  }
+
+  const sortSchools = (schools: string[]) => {
+    return schools.sort((a, b) => {
+      const getOrder = (school: string) => {
+        if (school.includes("중학교")) return 0
+        if (school.includes("고등학교")) return 1
+        return 2
+      }
+
+      const orderA = getOrder(a)
+      const orderB = getOrder(b)
+
+      // 1️⃣ 먼저 중/고 순서 정렬
+      if (orderA !== orderB) return orderA - orderB
+
+      // 2️⃣ 같은 그룹 안에서는 가나다순
+      return a.localeCompare(b, "ko")
+    })
   }
 
   return (
@@ -514,27 +648,104 @@ function CreateAssignmentDialog({
           </div>
           <div className="space-y-2">
             <Label>대상 학생 지정</Label>
-            <div className="rounded-lg border border-border p-3 max-h-[250px] overflow-y-auto">
-              <div className="space-y-2">
-                {students.map((student) => (
-                  <label
-                    key={student.id}
-                    className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
-                  >
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                      checked={selectedStudents.has(student.id)}
-                      onChange={() => toggleStudent(student.id)}
-                    />
-                    <span className="text-sm text-foreground">
-                      {student.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {student.grade}
-                    </span>
-                  </label>
-                ))}
+            <div className="rounded-lg border border-border p-3">
+              <div className="mb-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedSchoolCategory("all")}
+                  className={`px-3 py-1.5 text-sm rounded-md transition-colors font-medium ${selectedSchoolCategory === "all"
+                    ? "bg-violet-500 text-white"
+                    : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
+                    }`}
+                >
+                  전체 ({students.length})
+                </button>
+                {sortSchools(getSchools().slice()).map((school) => {
+                  const schoolCount = students.filter((s) => s.school === school).length
+
+                  return (
+                    <button
+                      key={school}
+                      type="button"
+                      onClick={() => setSelectedSchoolCategoryEdit(school)}
+                      className={`px-3 py-1.5 text-sm rounded-md transition-colors font-medium ${selectedSchoolCategoryEdit === school
+                          ? "bg-violet-500 text-white"
+                          : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
+                        }`}
+                    >
+                      {cleanSchoolName(school)} ({schoolCount})
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="max-h-[350px] overflow-y-auto scrollbar-hide">
+                <div className="space-y-3">
+                  {(() => {
+                    const categoryStudents = getStudentsByCategory(selectedSchoolCategory)
+                    const gradeGrouped = groupStudentsByGrade(categoryStudents)
+
+                    return sortGrades(Object.keys(gradeGrouped)).map((grade) => {
+                      const gradeStudents = gradeGrouped[grade]
+
+                      return (
+                        <div key={grade} className="space-y-2">
+                          {/* 학년 전체 선택 */}
+                          <label className="flex cursor-pointer items-center gap-3">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                              checked={gradeStudents.every((s) =>
+                                selectedStudents.has(s.id)
+                              )}
+                              onChange={() => {
+                                const allSelected = gradeStudents.every((s) =>
+                                  selectedStudents.has(s.id)
+                                )
+                                const updated = new Set(selectedStudents)
+
+                                gradeStudents.forEach((s) => {
+                                  if (allSelected) {
+                                    updated.delete(s.id)
+                                  } else {
+                                    updated.add(s.id)
+                                  }
+                                })
+
+                                setSelectedStudents(updated)
+                              }}
+                            />
+                            <span className="text-sm font-medium text-foreground">
+                              {grade}
+                            </span>
+                          </label>
+
+                          {/* 학생 목록 */}
+                          <div className="space-y-1.5 ml-6">
+                            {gradeStudents
+                              .slice()
+                              .sort((a, b) => a.name.localeCompare(b.name, "ko")) // ✅ 학생 가나다순
+                              .map((student) => (
+                                <label
+                                  key={student.id}
+                                  className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                    checked={selectedStudents.has(student.id)}
+                                    onChange={() => toggleStudent(student.id)}
+                                  />
+                                  <span className="text-sm text-foreground">
+                                    {student.name}
+                                  </span>
+                                </label>
+                              ))}
+                          </div>
+                        </div>
+                      )
+                    })
+                  })()}
+                </div>
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -884,13 +1095,12 @@ function AdminAssignmentCard({
               </span>
               {assignment.status === "진행중" && days > 0 && (
                 <span
-                  className={`font-medium ${
-                    days <= 2
-                      ? "text-destructive"
-                      : days <= 5
-                        ? "text-amber-600"
-                        : "text-muted-foreground"
-                  }`}
+                  className={`font-medium ${days <= 2
+                    ? "text-destructive"
+                    : days <= 5
+                      ? "text-amber-600"
+                      : "text-muted-foreground"
+                    }`}
                 >
                   D-{days}
                 </span>
@@ -1077,6 +1287,6 @@ export default function AssignmentsPage() {
   const { isAdmin, user } = useAuth()
 
   if (!user) return null
-  
+
   return <AppLayout>{isAdmin ? <AdminView /> : <StudentView currentUserId={user?.id || ""} />}</AppLayout>
 }

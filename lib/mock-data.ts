@@ -368,6 +368,10 @@ export const students: Student[] = [
   { id: "user-3", name: "정하준", grade: "고등학교 1학년", region: "서울특별시", school: "가고등학교" },
   { id: "user-4", name: "최은서", grade: "고등학교 3학년", region: "서울특별시", school: "다고등학교" },
   { id: "user-5", name: "박지호", grade: "고등학교 2학년", region: "서울특별시", school: "나고등학교" },
+  { id: "user-6", name: "김철수", grade: "중학교 1학년", region: "서울특별시", school: "가중학교" },
+  { id: "user-7", name: "이영희", grade: "중학교 3학년", region: "서울특별시", school: "나중학교" },
+  { id: "user-8", name: "조민지", grade: "중학교 2학년", region: "서울특별시", school: "나중학교" },
+  { id: "user-9", name: "박지우", grade: "중학교 2학년", region: "서울특별시", school: "다중학교" },
 ]
 
 // Assignments
