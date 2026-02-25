@@ -189,6 +189,8 @@ export default function MyPage() {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="이름을 입력하세요"
+                    readOnly
+                    className="text-gray-400"
                   />
                 </div>
 
@@ -201,6 +203,8 @@ export default function MyPage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="이메일을 입력하세요"
+                    readOnly
+                    className="text-gray-400"
                   />
                 </div>
 
