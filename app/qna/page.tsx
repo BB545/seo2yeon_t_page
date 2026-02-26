@@ -761,7 +761,7 @@ export default function QnaPage() {
               : "궁금한 점을 질문하세요. 모든 게시글은 비공개로 처리됩니다."}
           </p>
         </div>
-        {(!isAdmin || !isAssistantAdmin) && (
+        {(!isAdmin && !isAssistantAdmin) && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">

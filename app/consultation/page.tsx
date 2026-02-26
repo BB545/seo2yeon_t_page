@@ -448,7 +448,7 @@ export default function ConsultationPage() {
               : "학습 방향, 진로 등 고민에 대해 자유롭게 남겨주세요."}
           </p>
         </div>
-        {(!isAdmin || !isAssistantAdmin) && (
+        {(!isAdmin && !isAssistantAdmin) && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
