@@ -305,7 +305,7 @@ function ConsultationItem({
                             }
                           }}
                         >
-                          <div className="space-y-2">
+                          {/* <div className="space-y-2">
                             <Label>상담 상태 변경</Label>
                             <Select value={answerStatus} onValueChange={(value) => setAnswerStatus(value as Consultation["status"])}>
                               <SelectTrigger>
@@ -316,7 +316,7 @@ function ConsultationItem({
                                 <SelectItem value="답변완료">답변완료</SelectItem>
                               </SelectContent>
                             </Select>
-                          </div>
+                          </div> */}
                           <div className="space-y-2">
                             <Label htmlFor="consult-answer">답변 내용</Label>
                             <Textarea
