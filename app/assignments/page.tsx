@@ -203,6 +203,7 @@ function StudentAssignmentCard({ assignment, currentUserId }: { assignment: Assi
                       {fileName}
                     </div>
                   )}
+                  <p className="text-xs text-red-500">과제는 제출 후 수정이나 삭제가 불가능합니다.</p>
                   <div className="flex justify-end gap-2">
                     <Button
                       type="button"
