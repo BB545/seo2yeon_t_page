@@ -232,6 +232,49 @@ function StudentView({ currentUserId }: { currentUserId: string }) {
   const completed = myAssignments.filter((a) => a.status === "제출완료")
   const overdue = myAssignments.filter((a) => a.status === "마감")
 
+  const [currentPages, setCurrentPages] = useState({
+    all: 1,
+    pending: 1,
+    completed: 1,
+    overdue: 1,
+  })
+
+  const ITEMS_PER_PAGE = 5
+
+  const getPaginatedData = (data: Assignment[]) => {
+    const startIdx = (currentPages.all - 1) * ITEMS_PER_PAGE
+    return data.slice(startIdx, startIdx + ITEMS_PER_PAGE)
+  }
+
+  const getPaginatedDataByTab = (data: Assignment[], tab: "all" | "pending" | "completed" | "overdue") => {
+    const startIdx = (currentPages[tab] - 1) * ITEMS_PER_PAGE
+    return data.slice(startIdx, startIdx + ITEMS_PER_PAGE)
+  }
+
+  const getTotalPages = (data: Assignment[]) => {
+    return Math.ceil(data.length / ITEMS_PER_PAGE)
+  }
+
+  const renderPaginationButtons = (data: Assignment[], tab: "all" | "pending" | "completed" | "overdue") => {
+    const totalPages = getTotalPages(data)
+    if (totalPages <= 1) return null
+
+    return (
+      <div className="mt-6 flex justify-center gap-2">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <Button
+            key={page}
+            variant={currentPages[tab] === page ? "default" : "outline"}
+            size="sm"
+            onClick={() => setCurrentPages({ ...currentPages, [tab]: page })}
+          >
+            {page}
+          </Button>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <>
       {/* Header */}
@@ -279,24 +322,28 @@ function StudentView({ currentUserId }: { currentUserId: string }) {
           <TabsTrigger value="overdue">마감 ({overdue.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="all" className="mt-4 space-y-3">
-          {myAssignments.map((a) => (
+          {getPaginatedDataByTab(myAssignments, "all").map((a) => (
             <StudentAssignmentCard key={a.id} assignment={a} currentUserId={currentUserId} />
           ))}
+          {renderPaginationButtons(myAssignments, "all")}
         </TabsContent>
         <TabsContent value="pending" className="mt-4 space-y-3">
-          {pending.map((a) => (
+          {getPaginatedDataByTab(pending, "pending").map((a) => (
             <StudentAssignmentCard key={a.id} assignment={a} currentUserId={currentUserId} />
           ))}
+          {renderPaginationButtons(pending, "pending")}
         </TabsContent>
         <TabsContent value="completed" className="mt-4 space-y-3">
-          {completed.map((a) => (
+          {getPaginatedDataByTab(completed, "completed").map((a) => (
             <StudentAssignmentCard key={a.id} assignment={a} currentUserId={currentUserId} />
           ))}
+          {renderPaginationButtons(completed, "completed")}
         </TabsContent>
         <TabsContent value="overdue" className="mt-4 space-y-3">
-          {overdue.map((a) => (
+          {getPaginatedDataByTab(overdue, "overdue").map((a) => (
             <StudentAssignmentCard key={a.id} assignment={a} currentUserId={currentUserId} />
           ))}
+          {renderPaginationButtons(overdue, "overdue")}
         </TabsContent>
       </Tabs>
     </>
@@ -1141,9 +1188,16 @@ function AdminView() {
     useState<Assignment | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [assignmentsList, setAssignmentsList] = useState(assignments)
+  const [currentPages, setCurrentPages] = useState({
+    all: 1,
+    pending: 1,
+    closed: 1,
+  })
 
   const pending = assignmentsList.filter((a) => a.status === "진행중")
   const closed = assignmentsList.filter((a) => a.status !== "진행중")
+
+  const ITEMS_PER_PAGE = 5
 
   const handleCreateSubmit = (data: {
     title: string
@@ -1182,6 +1236,35 @@ function AdminView() {
     console.log("과제 삭제:", assignmentId)
     setAssignmentsList(assignmentsList.filter((a) => a.id !== assignmentId))
     setSelectedAssignment(null)
+  }
+
+  const getPaginatedDataByTab = (data: Assignment[], tab: "all" | "pending" | "closed") => {
+    const startIdx = (currentPages[tab] - 1) * ITEMS_PER_PAGE
+    return data.slice(startIdx, startIdx + ITEMS_PER_PAGE)
+  }
+
+  const getTotalPages = (data: Assignment[]) => {
+    return Math.ceil(data.length / ITEMS_PER_PAGE)
+  }
+
+  const renderPaginationButtons = (data: Assignment[], tab: "all" | "pending" | "closed") => {
+    const totalPages = getTotalPages(data)
+    if (totalPages <= 1) return null
+
+    return (
+      <div className="mt-6 flex justify-center gap-2">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <Button
+            key={page}
+            variant={currentPages[tab] === page ? "default" : "outline"}
+            size="sm"
+            onClick={() => setCurrentPages({ ...currentPages, [tab]: page })}
+          >
+            {page}
+          </Button>
+        ))}
+      </div>
+    )
   }
 
   if (selectedAssignment) {
@@ -1251,31 +1334,34 @@ function AdminView() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="all" className="mt-4 space-y-3">
-          {assignmentsList.map((a) => (
+          {getPaginatedDataByTab(assignmentsList, "all").map((a) => (
             <AdminAssignmentCard
               key={a.id}
               assignment={a}
               onClick={() => setSelectedAssignment(a)}
             />
           ))}
+          {renderPaginationButtons(assignmentsList, "all")}
         </TabsContent>
         <TabsContent value="pending" className="mt-4 space-y-3">
-          {pending.map((a) => (
+          {getPaginatedDataByTab(pending, "pending").map((a) => (
             <AdminAssignmentCard
               key={a.id}
               assignment={a}
               onClick={() => setSelectedAssignment(a)}
             />
           ))}
+          {renderPaginationButtons(pending, "pending")}
         </TabsContent>
         <TabsContent value="closed" className="mt-4 space-y-3">
-          {closed.map((a) => (
+          {getPaginatedDataByTab(closed, "closed").map((a) => (
             <AdminAssignmentCard
               key={a.id}
               assignment={a}
               onClick={() => setSelectedAssignment(a)}
             />
           ))}
+          {renderPaginationButtons(closed, "closed")}
         </TabsContent>
       </Tabs>
     </>

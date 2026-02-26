@@ -361,6 +361,8 @@ export default function ConsultationPage() {
   const [newTitle, setNewTitle] = useState("")
   const [newContent, setNewContent] = useState("")
   const [consultationType, setConsultationType] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const ITEMS_PER_PAGE = 10
 
   // LocalStorage에 consultations 저장
   useEffect(() => {
@@ -403,6 +405,7 @@ export default function ConsultationPage() {
       setNewContent("")
       setConsultationType("")
       setDialogOpen(false)
+      setCurrentPage(1)
     }
   }
 
@@ -415,7 +418,15 @@ export default function ConsultationPage() {
   }
 
   const handleDeleteConsultation = (id: string) => {
-    setConsultations(consultations.filter((item) => item.id !== id))
+    const filtered = consultations.filter((item) => item.id !== id)
+    setConsultations(filtered)
+    
+    const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages)
+    } else if (totalPages === 0) {
+      setCurrentPage(1)
+    }
   }
 
   const handleUpdateAnswer = (id: string, answer: string, status: Consultation["status"]) => {
@@ -570,20 +581,63 @@ export default function ConsultationPage() {
 
       {/* Consultation list */}
       <div className="space-y-3">
-        {consultations.map((item) => (
-          <ConsultationItem
-            key={item.id}
-            item={item}
-            currentUserId={user?.id || ""}
-            isAdmin={isAdmin}
-            isAssistantAdmin={isAssistantAdmin}
-            isStaff={isStaff}
-            onUpdateConsultation={handleUpdateConsultation}
-            onDeleteConsultation={handleDeleteConsultation}
-            onUpdateAnswer={handleUpdateAnswer}
-            onDeleteAnswer={handleDeleteAnswer}
-          />
-        ))}
+        {(() => {
+          const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+          const endIndex = startIndex + ITEMS_PER_PAGE
+          const paginatedConsultations = consultations.slice(startIndex, endIndex)
+          const totalPages = Math.ceil(consultations.length / ITEMS_PER_PAGE)
+
+          return (
+            <>
+              {paginatedConsultations.map((item) => (
+                <ConsultationItem
+                  key={item.id}
+                  item={item}
+                  currentUserId={user?.id || ""}
+                  isAdmin={isAdmin}
+                  isAssistantAdmin={isAssistantAdmin}
+                  isStaff={isStaff}
+                  onUpdateConsultation={handleUpdateConsultation}
+                  onDeleteConsultation={handleDeleteConsultation}
+                  onUpdateAnswer={handleUpdateAnswer}
+                  onDeleteAnswer={handleDeleteAnswer}
+                />
+              ))}
+
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    이전
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className="min-w-10"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    다음
+                  </Button>
+                </div>
+              )}
+            </>
+          )
+        })()}
       </div>
     </AppLayout>
   )

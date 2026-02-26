@@ -606,7 +606,9 @@ export default function QnaPage() {
   const [newTitle, setNewTitle] = useState("")
   const [newContent, setNewContent] = useState("")
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const ITEMS_PER_PAGE = 10
 
   // LocalStorage에 posts 저장
   useEffect(() => {
@@ -639,6 +641,10 @@ export default function QnaPage() {
     return false
   })
 
+  const totalPages = Math.ceil(filteredPosts.length / ITEMS_PER_PAGE)
+  const startIdx = (currentPage - 1) * ITEMS_PER_PAGE
+  const paginatedPosts = filteredPosts.slice(startIdx, startIdx + ITEMS_PER_PAGE)
+
   const handleAddQuestion = () => {
     if (newTitle.trim() && newContent.trim()) {
       const newPost: QnaPost = {
@@ -659,6 +665,7 @@ export default function QnaPage() {
       setNewContent("")
       setAttachedFiles([])
       setDialogOpen(false)
+      setCurrentPage(1)
     }
   }
 
@@ -906,13 +913,16 @@ export default function QnaPage() {
           placeholder={isAdmin || isAssistantAdmin ? "질문 검색" : "내 질문 검색"}
           className="pl-9"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value)
+            setCurrentPage(1)
+          }}
         />
       </div>
 
       {/* Post list */}
       <div className="space-y-3">
-        {filteredPosts.map((post) => (
+        {paginatedPosts.map((post) => (
           <QnaPostItem
             key={post.id}
             post={post}
@@ -928,6 +938,41 @@ export default function QnaPage() {
           />
         ))}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+          >
+            이전
+          </Button>
+          <div className="flex gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCurrentPage(page)}
+                className="min-w-9"
+              >
+                {page}
+              </Button>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+          >
+            다음
+          </Button>
+        </div>
+      )}
     </AppLayout>
   )
 }
