@@ -24,14 +24,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { BookOpen, ArrowRight, Plus, Pencil, Trash2 } from "lucide-react"
-import { lectureCategories, LectureCategory, students } from "@/lib/mock-data"
+import { lectureCategories, LectureCategory, courses } from "@/lib/mock-data"
 import { useAuth } from "@/lib/auth-context"
 
 interface CategoryFormData {
   name: string
   description: string
   instructor: string
-  assignedTo: string[]
 }
 
 export default function LecturesPage() {
@@ -43,29 +42,23 @@ export default function LecturesPage() {
     name: "",
     description: "",
     instructor: "",
-    assignedTo: [],
   })
-  const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set())
   const [refreshKey, setRefreshKey] = useState(0)
-  const [selectedSchoolCategory, setSelectedSchoolCategory] = useState<string>("all")
-  const [selectedSchoolCategoryEdit, setSelectedSchoolCategoryEdit] = useState<string>("all")
 
   if (!user) return null
-
-  const getStudentName = (studentId: string) => {
-    const student = students.find((s) => s.id === studentId)
-    return student?.name || "알 수 없음"
-  }
 
   const getVisibleCategories = () => {
     if (isAdmin || isAssistantAdmin) {
       return lectureCategories
     }
+    // 학생: 본인이 지정된 강좌가 있는 카테고리만 표시
     return lectureCategories.filter((category) => {
-      if (!category.assignedTo || category.assignedTo.length === 0) {
-        return false
-      }
-      return category.assignedTo.includes(user?.id || "")
+      const categoryHasAssignedCourse = courses.some(
+        (course) =>
+          course.categoryId === category.id &&
+          course.assignedTo.includes(user?.id || "")
+      )
+      return categoryHasAssignedCourse
     })
   }
 
@@ -79,7 +72,6 @@ export default function LecturesPage() {
       instructor: formData.instructor,
       thumbnail: "",
       courseCount: 0,
-      assignedTo: Array.from(selectedStudents),
     }
 
     lectureCategories.push(newCategory)
@@ -87,9 +79,7 @@ export default function LecturesPage() {
       name: "",
       description: "",
       instructor: "",
-      assignedTo: []
     })
-    setSelectedStudents(new Set())
     setAddOpen(false)
     setRefreshKey((prev) => prev + 1)
   }
@@ -99,9 +89,7 @@ export default function LecturesPage() {
       name: category.name,
       description: category.description,
       instructor: category.instructor,
-      assignedTo: category.assignedTo || [],
     })
-    setSelectedStudents(new Set(category.assignedTo || []))
     setEditingId(category.id)
     setEditOpen(true)
   }
@@ -113,11 +101,9 @@ export default function LecturesPage() {
       category.name = formData.name
       category.description = formData.description
       category.instructor = formData.instructor
-      category.assignedTo = Array.from(selectedStudents)
     }
     setEditingId(null)
     setEditOpen(false)
-    setSelectedStudents(new Set())
     setRefreshKey((prev) => prev + 1)
   }
 
@@ -127,149 +113,6 @@ export default function LecturesPage() {
       lectureCategories.splice(index, 1)
       setRefreshKey((prev) => prev + 1)
     }
-  }
-
-  const toggleStudent = (studentId: string) => {
-    const updated = new Set(selectedStudents)
-    if (updated.has(studentId)) {
-      updated.delete(studentId)
-    } else {
-      updated.add(studentId)
-    }
-    setSelectedStudents(updated)
-  }
-
-  const selectAllStudents = () => {
-    setSelectedStudents(new Set(students.map((s) => s.id)))
-  }
-
-  const deselectAllStudents = () => {
-    setSelectedStudents(new Set())
-  }
-
-  const selectAllBySchool = (school: string) => {
-    const schoolStudents = students.filter((s) => s.school === school).map((s) => s.id)
-    const updated = new Set(selectedStudents)
-    schoolStudents.forEach((id) => updated.add(id))
-    setSelectedStudents(updated)
-  }
-
-  const deselectAllBySchool = (school: string) => {
-    const schoolStudents = students.filter((s) => s.school === school).map((s) => s.id)
-    const updated = new Set(selectedStudents)
-    schoolStudents.forEach((id) => updated.delete(id))
-    setSelectedStudents(updated)
-  }
-
-  const selectAllBySchoolAndGrade = (school: string, grade: string) => {
-    const filteredStudents = students
-      .filter((s) => s.school === school && s.grade === grade)
-      .map((s) => s.id)
-    const updated = new Set(selectedStudents)
-    filteredStudents.forEach((id) => updated.add(id))
-    setSelectedStudents(updated)
-  }
-
-  const deselectAllBySchoolAndGrade = (school: string, grade: string) => {
-    const filteredStudents = students
-      .filter((s) => s.school === school && s.grade === grade)
-      .map((s) => s.id)
-    const updated = new Set(selectedStudents)
-    filteredStudents.forEach((id) => updated.delete(id))
-    setSelectedStudents(updated)
-  }
-
-  const isAllStudentsSelected = () => {
-    return students.length > 0 && selectedStudents.size === students.length
-  }
-
-  const isAllSchoolStudentsSelected = (school: string) => {
-    const schoolStudents = students.filter((s) => s.school === school)
-    if (schoolStudents.length === 0) return false
-    return schoolStudents.every((s) => selectedStudents.has(s.id))
-  }
-
-  const isAllGradeStudentsSelected = (school: string, grade: string) => {
-    const gradeStudents = students.filter((s) => s.school === school && s.grade === grade)
-    if (gradeStudents.length === 0) return false
-    return gradeStudents.every((s) => selectedStudents.has(s.id))
-  }
-
-  const groupStudentsBySchool = () => {
-    const grouped: { [key: string]: typeof students } = {}
-    students.forEach((student) => {
-      if (!grouped[student.school]) {
-        grouped[student.school] = []
-      }
-      grouped[student.school].push(student)
-    })
-    return grouped
-  }
-
-  const groupStudentsByGrade = (schoolStudents: typeof students) => {
-    const grouped: { [key: string]: typeof students } = {}
-    schoolStudents.forEach((student) => {
-      if (!grouped[student.grade]) {
-        grouped[student.grade] = []
-      }
-      grouped[student.grade].push(student)
-    })
-    return grouped
-  }
-
-  const getStudentsByCategory = (categoryType: "all" | string) => {
-    if (categoryType === "all") {
-      return students
-    }
-    return students.filter((s) => s.school === categoryType)
-  }
-
-  const getSchools = () => {
-    const schools = new Set(students.map((s) => s.school))
-    return Array.from(schools).sort()
-  }
-
-  const cleanSchoolName = (name: string) => {
-    return name
-      .replace(/학교|등학교/g, "")
-      .trim()
-  }
-
-  const sortGrades = (grades: string[]) => {
-    return grades.sort((a, b) => {
-      const getOrder = (grade: string) => {
-        if (grade.includes("중학교")) {
-          const num = parseInt(grade.match(/\d+/)?.[0] || "0")
-          return num // 1,2,3
-        }
-        if (grade.includes("고등학교")) {
-          const num = parseInt(grade.match(/\d+/)?.[0] || "0")
-          return 10 + num // 11,12,13 (중학교 뒤에 오게)
-        }
-        return 99
-      }
-
-      return getOrder(a) - getOrder(b)
-    })
-  }
-
-  const sortSchools = (schools: string[]) => {
-    return schools.sort((a, b) => {
-      const getOrder = (school: string) => {
-        if (school.includes("중학교")) return 0
-        if (school.includes("고등학교")) return 1
-        return 2
-      }
-
-      const orderA = getOrder(a)
-      const orderB = getOrder(b)
-
-      // 1️⃣ 먼저 중/고 순서 정렬
-      if (orderA !== orderB) return orderA - orderB
-
-      // 2️⃣ 같은 그룹 안에서는 가나다순
-      return a.localeCompare(b, "ko")
-    })
   }
 
   const visibleCategories = getVisibleCategories()
@@ -332,119 +175,13 @@ export default function LecturesPage() {
                     onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>대상 학생 지정 *</Label>
-                  <div className="rounded-lg border border-border p-3">
-                    <div className="mb-4 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedSchoolCategory("all")}
-                        className={`px-3 py-1.5 text-sm rounded-md transition-colors font-medium ${selectedSchoolCategory === "all"
-                          ? "bg-violet-500 text-white"
-                          : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
-                          }`}
-                      >
-                        전체 ({students.length})
-                      </button>
-                      {sortSchools(getSchools().slice()).map((school) => {
-                        const schoolCount = students.filter((s) => s.school === school).length
-
-                        return (
-                          <button
-                            key={school}
-                            type="button"
-                            onClick={() => setSelectedSchoolCategoryEdit(school)}
-                            className={`px-3 py-1.5 text-sm rounded-md transition-colors font-medium ${selectedSchoolCategoryEdit === school
-                              ? "bg-violet-500 text-white"
-                              : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
-                              }`}
-                          >
-                            {cleanSchoolName(school)} ({schoolCount})
-                          </button>
-                        )
-                      })}
-                    </div>
-                    <div className="max-h-[350px] overflow-y-auto scrollbar-hide">
-                      <div className="space-y-3">
-                        {(() => {
-                          const categoryStudents = getStudentsByCategory(selectedSchoolCategory)
-                          const gradeGrouped = groupStudentsByGrade(categoryStudents)
-
-                          return sortGrades(Object.keys(gradeGrouped)).map((grade) => {
-                            const gradeStudents = gradeGrouped[grade]
-
-                            return (
-                              <div key={grade} className="space-y-2">
-                                {/* 학년 전체 선택 */}
-                                <label className="flex cursor-pointer items-center gap-3">
-                                  <input
-                                    type="checkbox"
-                                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                                    checked={gradeStudents.every((s) =>
-                                      selectedStudents.has(s.id)
-                                    )}
-                                    onChange={() => {
-                                      const allSelected = gradeStudents.every((s) =>
-                                        selectedStudents.has(s.id)
-                                      )
-                                      const updated = new Set(selectedStudents)
-
-                                      gradeStudents.forEach((s) => {
-                                        if (allSelected) {
-                                          updated.delete(s.id)
-                                        } else {
-                                          updated.add(s.id)
-                                        }
-                                      })
-
-                                      setSelectedStudents(updated)
-                                    }}
-                                  />
-                                  <span className="text-sm font-medium text-foreground">
-                                    {grade}
-                                  </span>
-                                </label>
-
-                                {/* 학생 목록 */}
-                                <div className="space-y-1.5 ml-6">
-                                  {gradeStudents
-                                    .slice()
-                                    .sort((a, b) => a.name.localeCompare(b.name, "ko")) // ✅ 학생 가나다순
-                                    .map((student) => (
-                                      <label
-                                        key={student.id}
-                                        className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
-                                      >
-                                        <input
-                                          type="checkbox"
-                                          className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                                          checked={selectedStudents.has(student.id)}
-                                          onChange={() => toggleStudent(student.id)}
-                                        />
-                                        <span className="text-sm text-foreground">
-                                          {student.name}
-                                        </span>
-                                      </label>
-                                    ))}
-                                </div>
-                              </div>
-                            )
-                          })
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedStudents.size}명 선택됨
-                  </p>
-                </div>
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
                     취소
                   </Button>
                   <Button
                     type="submit"
-                    disabled={!formData.name || !formData.description || !formData.instructor || selectedStudents.size === 0}
+                    disabled={!formData.name || !formData.description || !formData.instructor}
                   >
                     추가
                   </Button>
@@ -483,28 +220,6 @@ export default function LecturesPage() {
                       </Badge>
                       <span className="text-xs text-muted-foreground">{category.courseCount}개 강좌</span>
                     </div>
-                    {/* 관리자 뷰: 할당된 학생 정보 표시 */}
-                    {(isAdmin || isAssistantAdmin) && (
-                      category.assignedTo && category.assignedTo.length > 0 ? (
-                        <div className="mt-3 pt-3 border-t border-border/50">
-                          <p className="text-xs text-muted-foreground mb-2">지정된 학생:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {category.assignedTo.map((studentId) => (
-                              <Badge key={studentId} variant="outline" className="text-xs">
-                                {getStudentName(studentId)}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="mt-3 pt-3 border-t border-border/50">
-                          <p className="text-xs text-muted-foreground mb-2">지정된 학생:</p>
-                          <span className="text-xs text-muted-foreground">
-                            지정된 학생이 없습니다. (접근 제한됨)
-                          </span>
-                        </div>
-                      )
-                    )}
                   </CardContent>
                 </Card>
               </Link>
@@ -577,112 +292,6 @@ export default function LecturesPage() {
                   value={formData.instructor}
                   onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>대상 학생 지정</Label>
-                <div className="rounded-lg border border-border p-3">
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedSchoolCategoryEdit("all")}
-                      className={`px-3 py-1.5 text-sm rounded-md transition-colors font-medium ${selectedSchoolCategoryEdit === "all"
-                        ? "bg-violet-500 text-white"
-                        : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
-                        }`}
-                    >
-                      전체 ({students.length})
-                    </button>
-                    {sortSchools(getSchools().slice()).map((school) => {
-                      const schoolCount = students.filter((s) => s.school === school).length
-
-                      return (
-                        <button
-                          key={school}
-                          type="button"
-                          onClick={() => setSelectedSchoolCategoryEdit(school)}
-                          className={`px-3 py-1.5 text-sm rounded-md transition-colors font-medium ${selectedSchoolCategoryEdit === school
-                              ? "bg-violet-500 text-white"
-                              : "bg-muted text-muted-foreground hover:bg-muted-foreground/20"
-                            }`}
-                        >
-                          {cleanSchoolName(school)} ({schoolCount})
-                        </button>
-                      )
-                    })}
-                  </div>
-                  <div className="max-h-[350px] overflow-y-auto scrollbar-hide">
-                    <div className="space-y-3">
-                      {(() => {
-                        const categoryStudents = getStudentsByCategory(selectedSchoolCategoryEdit)
-                        const gradeGrouped = groupStudentsByGrade(categoryStudents)
-
-                        return sortGrades(Object.keys(gradeGrouped)).map((grade) => {
-                          const gradeStudents = gradeGrouped[grade]
-
-                          return (
-                            <div key={grade} className="space-y-2">
-                              {/* 학년 전체 선택 */}
-                              <label className="flex cursor-pointer items-center gap-3">
-                                <input
-                                  type="checkbox"
-                                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                                  checked={gradeStudents.every((s) =>
-                                    selectedStudents.has(s.id)
-                                  )}
-                                  onChange={() => {
-                                    const allSelected = gradeStudents.every((s) =>
-                                      selectedStudents.has(s.id)
-                                    )
-                                    const updated = new Set(selectedStudents)
-
-                                    gradeStudents.forEach((s) => {
-                                      if (allSelected) {
-                                        updated.delete(s.id)
-                                      } else {
-                                        updated.add(s.id)
-                                      }
-                                    })
-
-                                    setSelectedStudents(updated)
-                                  }}
-                                />
-                                <span className="text-sm font-medium text-foreground">
-                                  {grade}
-                                </span>
-                              </label>
-
-                              {/* 학생 목록 */}
-                              <div className="space-y-1.5 ml-6">
-                                {gradeStudents
-                                  .slice()
-                                  .sort((a, b) => a.name.localeCompare(b.name, "ko")) // ✅ 학생 가나다순
-                                  .map((student) => (
-                                    <label
-                                      key={student.id}
-                                      className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-                                        checked={selectedStudents.has(student.id)}
-                                        onChange={() => toggleStudent(student.id)}
-                                      />
-                                      <span className="text-sm text-foreground">
-                                        {student.name}
-                                      </span>
-                                    </label>
-                                  ))}
-                              </div>
-                            </div>
-                          )
-                        })
-                      })()}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {selectedStudents.size}명 선택됨
-                </p>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>

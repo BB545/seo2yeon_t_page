@@ -153,7 +153,6 @@ export interface LectureCategory {
   instructor: string
   thumbnail: string
   courseCount: number
-  assignedTo: string[]
 }
 
 export interface Course {
@@ -161,6 +160,7 @@ export interface Course {
   categoryId: string
   name: string
   lessonCount: number
+  assignedTo: string[]
 }
 
 export interface Lesson {
@@ -191,7 +191,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "서이연",
     thumbnail: "",
     courseCount: 4,
-    assignedTo: ["user-1", "user-2", "user-3"],
   },
   {
     id: "cat-2",
@@ -200,7 +199,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "서이연",
     thumbnail: "",
     courseCount: 3,
-    assignedTo: ["user-1", "user-4"],
   },
   {
     id: "cat-3",
@@ -209,7 +207,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "서이연",
     thumbnail: "",
     courseCount: 3,
-    assignedTo: [],
   },
   {
     id: "cat-4",
@@ -218,7 +215,6 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "서이연",
     thumbnail: "",
     courseCount: 2,
-    assignedTo: ["user-1", "user-3"],
   },
   {
     id: "cat-5",
@@ -227,21 +223,20 @@ export const lectureCategories: LectureCategory[] = [
     instructor: "서이연",
     thumbnail: "",
     courseCount: 2,
-    assignedTo: [],
   },
 ];
 
 export const courses: Course[] = [
-  { id: "course-1", categoryId: "cat-1", name: "미적분 기본 개념반", lessonCount: 3 },
-  { id: "course-2", categoryId: "cat-1", name: "미적분 응용 문제반", lessonCount: 0 },
-  { id: "course-3", categoryId: "cat-1", name: "미적분 심화 풀이반", lessonCount: 0 },
-  { id: "course-4", categoryId: "cat-2", name: "수열 개념 완성반", lessonCount: 0 },
-  { id: "course-5", categoryId: "cat-2", name: "수열 문제 풀이 전략반", lessonCount: 0 },
-  { id: "course-6", categoryId: "cat-3", name: "확률과 통계 개념 완성", lessonCount: 0 },
-  { id: "course-7", categoryId: "cat-3", name: "확률과 통계 문제 풀이반", lessonCount: 0 },
-  { id: "course-8", categoryId: "cat-4", name: "기하 개념 완성반", lessonCount: 0 },
-  { id: "course-9", categoryId: "cat-4", name: "벡터 심화 풀이반", lessonCount: 0 },
-  { id: "course-10", categoryId: "cat-4", name: "기하와 벡터 실전 문제반", lessonCount: 0 },
+  { id: "course-1", categoryId: "cat-1", name: "미적분 기본 개념반", lessonCount: 3, assignedTo: ["user-1", "user-2"] },
+  { id: "course-2", categoryId: "cat-1", name: "미적분 응용 문제반", lessonCount: 0, assignedTo: ["user-1", "user-3"] },
+  { id: "course-3", categoryId: "cat-1", name: "미적분 심화 풀이반", lessonCount: 0, assignedTo: [] },
+  { id: "course-4", categoryId: "cat-2", name: "수열 개념 완성반", lessonCount: 0, assignedTo: ["user-1", "user-4"] },
+  { id: "course-5", categoryId: "cat-2", name: "수열 문제 풀이 전략반", lessonCount: 0, assignedTo: [] },
+  { id: "course-6", categoryId: "cat-3", name: "확률과 통계 개념 완성", lessonCount: 0, assignedTo: ["user-2", "user-3", "user-4"] },
+  { id: "course-7", categoryId: "cat-3", name: "확률과 통계 문제 풀이반", lessonCount: 0, assignedTo: [] },
+  { id: "course-8", categoryId: "cat-4", name: "기하 개념 완성반", lessonCount: 0, assignedTo: [] },
+  { id: "course-9", categoryId: "cat-4", name: "벡터 심화 풀이반", lessonCount: 0, assignedTo: [] },
+  { id: "course-10", categoryId: "cat-4", name: "기하와 벡터 실전 문제반", lessonCount: 0, assignedTo: [] },
 ]
 
 export const lessons: Lesson[] = [
