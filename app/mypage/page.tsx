@@ -421,7 +421,8 @@ export default function MyPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-red-600 mb-4">
-                계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다.
+                계정을 삭제하면 30일 이내에 동일한 이메일로 재가입이 불가하며 <br />모든 데이터가 영구적으로 삭제됩니다.
+                탈퇴하시겠습니까?
               </p>
               <Button
                 variant="destructive"
