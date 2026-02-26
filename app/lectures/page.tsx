@@ -166,7 +166,7 @@ export default function LecturesPage() {
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="cat-instructor">강사명 *</Label>
                   <Input
                     id="cat-instructor"
@@ -174,7 +174,7 @@ export default function LecturesPage() {
                     value={formData.instructor}
                     onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
                   />
-                </div>
+                </div> */}
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
                     취소
@@ -285,14 +285,14 @@ export default function LecturesPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="edit-cat-instructor">강사명</Label>
                 <Input
                   id="edit-cat-instructor"
                   value={formData.instructor}
                   onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
                 />
-              </div>
+              </div> */}
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>
                   취소
