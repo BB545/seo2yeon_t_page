@@ -142,27 +142,27 @@ export default function CategoryPage({ params }: { params: Promise<{ categoryId:
   }
 
   // 카테고리 편집 Open
-  const handleEditOpen = () => {
-    if (category) {
-      setCategoryData({
-        name: category.name,
-        description: category.description,
-        instructor: category.instructor,
-      })
-    }
-    setEditOpen(true)
-  }
+  // const handleEditOpen = () => {
+  //   if (category) {
+  //     setCategoryData({
+  //       name: category.name,
+  //       description: category.description,
+  //       instructor: category.instructor,
+  //     })
+  //   }
+  //   setEditOpen(true)
+  // }
 
-  // 카테고리 저장
-  const handleSaveCategory = () => {
-    if (categoryData && category) {
-      category.name = categoryData.name
-      category.description = categoryData.description
-      category.instructor = categoryData.instructor
-    }
-    setEditOpen(false)
-    setRefreshKey((prev) => prev + 1)
-  }
+  // // 카테고리 저장
+  // const handleSaveCategory = () => {
+  //   if (categoryData && category) {
+  //     category.name = categoryData.name
+  //     category.description = categoryData.description
+  //     category.instructor = categoryData.instructor
+  //   }
+  //   setEditOpen(false)
+  //   setRefreshKey((prev) => prev + 1)
+  // }
 
   // 강좌 추가
   const handleAddCourse = () => {
@@ -250,7 +250,7 @@ export default function CategoryPage({ params }: { params: Promise<{ categoryId:
         {(isAdmin || isAssistantAdmin) && (
           <div className="flex gap-2">
             {/* 카테고리 편집 */}
-            <Dialog open={editOpen} onOpenChange={setEditOpen}>
+            {/* <Dialog open={editOpen} onOpenChange={setEditOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2 bg-transparent" onClick={handleEditOpen}>
                   <Pencil className="h-4 w-4" />
@@ -311,7 +311,7 @@ export default function CategoryPage({ params }: { params: Promise<{ categoryId:
                   </form>
                 </DialogContent>
               )}
-            </Dialog>
+            </Dialog> */}
 
             {/* 강좌 추가 */}
             <Dialog open={addCourseOpen} onOpenChange={setAddCourseOpen}>
